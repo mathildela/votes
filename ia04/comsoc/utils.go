@@ -21,7 +21,7 @@ func rank(alt Alternative, prefs []Alternative) int {
 
 // renvoie vrai ssi alt1 est préférée à alt2
 func isPref(alt1, alt2 Alternative, prefs []Alternative) bool {
-	return rank(alt1, prefs) > rank(alt2, prefs)
+	return rank(alt1, prefs) < rank(alt2, prefs)
 }
 
 // renvoie les meilleures alternatives pour un décomtpe donné
@@ -56,7 +56,7 @@ func contains(alts []Alternative, alt Alternative) bool {
 func checkProfile(prefs Profile) error {
 	//vérification complétude
 	lenght := len(prefs[0])
-	for i := 0; i <= len(prefs); i++ {
+	for i := 0; i < len(prefs); i++ {
 		if len(prefs[i]) != lenght {
 			err := fmt.Errorf("err : profile incomplet pour %d", i)
 			return err
@@ -64,13 +64,13 @@ func checkProfile(prefs Profile) error {
 	}
 
 	//vérification unicité alternative
-	verif := make([]Alternative, len(prefs[0]))
+	var verif []Alternative
 	var err error
 	for i := 0; i < len(prefs); i++ {
 		verif = nil
 		for j := 0; j < len(prefs[0]); j++ {
 			if contains(verif, prefs[i][j]) {
-				err = fmt.Errorf("err : préférence non unique pour votant %d", i)
+				err = fmt.Errorf("err : préférences non uniques pour votant %d", i)
 			}
 			verif = append(verif, prefs[i][j])
 		}
@@ -79,4 +79,30 @@ func checkProfile(prefs Profile) error {
 }
 
 // vérifie le profil donné, par ex. qu'ils sont tous complets et que chaque alternative de alts apparaît exactement une fois par préférences
-// func checkProfileAlternative(prefs Profile, alts []Alternative) error
+func checkProfileAlternative(prefs Profile, alts []Alternative) error {
+	//vérification complétude
+	lenght := len(prefs[0])
+	for i := 0; i < len(prefs); i++ {
+		if len(prefs[i]) != lenght {
+			err := fmt.Errorf("err : profile incomplet pour %d", i)
+			return err
+		}
+	}
+
+	//vérification unicité alternative
+	var verif []Alternative
+	var err error
+	for i := 0; i < len(prefs); i++ {
+		verif = nil
+		for j := 0; j < len(prefs[0]); j++ {
+			if contains(verif, prefs[i][j]) {
+				err = fmt.Errorf("err : préférences non uniques pour votant %d", i)
+			}
+			if !contains(alts, prefs[i][j]) {
+				err = fmt.Errorf("err : alternative %d pas dans la liste alts", prefs[i][j])
+			}
+			verif = append(verif, prefs[i][j])
+		}
+	}
+	return err
+}
