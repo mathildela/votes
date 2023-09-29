@@ -6,9 +6,25 @@ import (
 )
 
 func main() {
-	var alt comsoc.Alternative = 3
-	tab := [...]comsoc.Alternative{1, 2, 3, 4, 5}
-	prefs := tab[:]
+	prefs := [][]comsoc.Alternative{
+		{1, 2, 3},
+		{1, 2, 3},
+		{3, 2, 1},
+	}
+	/*
+		count, err := comsoc.MajoritySWF(prefs)
+		fmt.Println(count)
+		fmt.Println(err)
 
-	fmt.Println(alt, prefs)
+		alt, err := comsoc.MajoritySCF(prefs)
+		fmt.Println(alt)
+		fmt.Println(err)*/
+
+	count, err := comsoc.BordaSWF(prefs)
+	fmt.Println(count)
+	fmt.Println(err)
+
+	alt, err := comsoc.BordaSCF(prefs)
+	fmt.Println(alt)
+	fmt.Println(err)
 }

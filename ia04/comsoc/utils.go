@@ -1,7 +1,7 @@
 package comsoc
 
 import (
-	"fmt"
+	"errors"
 )
 
 type Alternative int
@@ -10,21 +10,26 @@ type Count map[Alternative]int
 
 // renvoie l'indice ou se trouve alt dans prefs
 func rank(alt Alternative, prefs []Alternative) int {
-	var ind int
-	for i := 0; i < len(prefs); i++ {
-		if prefs[i] == alt {
-			ind = i
+	for idx := range prefs {
+		if prefs[idx] == alt {
+			return idx
 		}
 	}
-	return ind
+	return -1
 }
 
 // renvoie vrai ssi alt1 est préférée à alt2
+// renvoie faux si alt1 ou alt2 n'est pas une alternative de prefs
 func isPref(alt1, alt2 Alternative, prefs []Alternative) bool {
+	if rank(alt1, prefs) == -1 || rank(alt2, prefs) == -1 {
+		return false
+	}
+
 	return rank(alt1, prefs) < rank(alt2, prefs)
 }
 
-// renvoie les meilleures alternatives pour un décomtpe donné
+// renvoie les meilleures alternatives pour un décompte donné
+// Vérifier avec plusieurs tests
 func maxCount(count Count) (bestAlts []Alternative) {
 	var max int = -1
 	bestAlts = make([]Alternative, 0)
@@ -44,65 +49,45 @@ func maxCount(count Count) (bestAlts []Alternative) {
 }
 
 func contains(alts []Alternative, alt Alternative) bool {
-	for _, s := range alts {
-		if alt == s {
+	for _, value := range alts {
+		if value == alt {
 			return true
 		}
 	}
 	return false
 }
 
-// vérifie le profil donné, par ex. qu'ils sont tous complets et que chaque alternative n'apparaît qu'une seule fois par préférences
-func checkProfile(prefs Profile) error {
-	//vérification complétude
-	lenght := len(prefs[0])
-	for i := 0; i < len(prefs); i++ {
-		if len(prefs[i]) != lenght {
-			err := fmt.Errorf("err : profile incomplet pour %d", i)
-			return err
-		}
+// vérifie les préférences d'un agent, par ex. qu'ils sont tous complets et que chaque alternative n'apparaît qu'une seule fois
+func checkProfile(prefs []Alternative, alts []Alternative) error {
+	// Check if no candidat is missing
+	if len(prefs) != len(alts) {
+		errors.New("Uncomplete profil")
 	}
 
-	//vérification unicité alternative
-	var verif []Alternative
-	var err error
-	for i := 0; i < len(prefs); i++ {
-		verif = nil
-		for j := 0; j < len(prefs[0]); j++ {
-			if contains(verif, prefs[i][j]) {
-				err = fmt.Errorf("err : préférences non uniques pour votant %d", i)
-			}
-			verif = append(verif, prefs[i][j])
+	// check if all candidates are the one in alts
+	var verif_alts []Alternative
+	for _, value := range prefs {
+		if contains(alts, value) {
+			verif_alts = append(verif_alts, value)
+		} else {
+			errors.New("Unexpected alternative")
 		}
 	}
-	return err
+	// check if there is duplicates
+	return nil
 }
 
-// vérifie le profil donné, par ex. qu'ils sont tous complets et que chaque alternative de alts apparaît exactement une fois par préférences
-func checkProfileAlternative(prefs Profile, alts []Alternative) error {
-	//vérification complétude
-	lenght := len(prefs[0])
-	for i := 0; i < len(prefs); i++ {
-		if len(prefs[i]) != lenght {
-			err := fmt.Errorf("err : profile incomplet pour %d", i)
-			return err
+// initialise le count, c'est-à-dire créé une clé pour chaque alternative et leur donne 0 comme valeur
+func initCount(p Profile) (count Count) {
+	count = make(Count)
+	for _, profile := range p {
+		for i := 0; i < len(profile); i++ {
+			_, check := count[profile[i]]
+			// check = true if the value already exists in count
+			if !check {
+				count[profile[i]] = 0
+			}
 		}
 	}
-
-	//vérification unicité alternative
-	var verif []Alternative
-	var err error
-	for i := 0; i < len(prefs); i++ {
-		verif = nil
-		for j := 0; j < len(prefs[0]); j++ {
-			if contains(verif, prefs[i][j]) {
-				err = fmt.Errorf("err : préférences non uniques pour votant %d", i)
-			}
-			if !contains(alts, prefs[i][j]) {
-				err = fmt.Errorf("err : alternative %d pas dans la liste alts", prefs[i][j])
-			}
-			verif = append(verif, prefs[i][j])
-		}
-	}
-	return err
+	return count
 }
