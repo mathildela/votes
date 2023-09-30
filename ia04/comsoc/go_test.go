@@ -101,45 +101,186 @@ func Test_maxCount(t *testing.T) {
 
 }
 
+func Test_checkProfile(t *testing.T) {
+	pref1 := []Alternative{1, 2, 3}
+	pref2 := []Alternative{1, 3}
+	pref3 := []Alternative{3, 1, 4}
+	pref4 := []Alternative{1, 2, 1}
+	alts := []Alternative{1, 2, 3}
+
+	if checkProfile(pref1, alts) != nil {
+		t.Errorf("error = %s", checkProfile(pref1, alts))
+	}
+	if checkProfile(pref2, alts) == nil {
+		t.Errorf("error = %s", checkProfile(pref2, alts))
+	}
+	if checkProfile(pref3, alts) == nil {
+		t.Errorf("error = %s", checkProfile(pref3, alts))
+	}
+	if checkProfile(pref4, alts) == nil {
+		t.Errorf("error = %s", checkProfile(pref4, alts))
+	}
+}
+
+func Test_checkProfileAlternative(t *testing.T) {
+	prefs1 := [][]Alternative{
+		{1, 2, 3},
+		{1, 2, 3},
+		{3, 2, 1},
+	}
+	prefs2 := [][]Alternative{
+		{1, 2, 3},
+		{1, 2, 3},
+		{3, 2, 1, 4},
+	}
+	prefs3 := [][]Alternative{
+		{1, 2, 3},
+		{1, 4, 3},
+		{3, 2, 1},
+	}
+	prefs4 := [][]Alternative{
+		{1, 2, 3},
+		{1, 2, 3},
+		{3, 1, 1},
+	}
+	alts := []Alternative{1, 2, 3}
+
+	if checkProfileAlternative(prefs1, alts) != nil {
+		t.Errorf("error = %s", checkProfileAlternative(prefs1, alts))
+	}
+	if checkProfileAlternative(prefs2, alts) == nil {
+		t.Errorf("error = %s", checkProfileAlternative(prefs2, alts))
+	}
+	if checkProfileAlternative(prefs3, alts) == nil {
+		t.Errorf("error = %s", checkProfileAlternative(prefs3, alts))
+	}
+
+	if checkProfileAlternative(prefs4, alts) == nil {
+		t.Errorf("error = %s", checkProfileAlternative(prefs4, alts))
+	}
+}
+
+func Test_initCount(t *testing.T) {
+	prefs := [][]Alternative{
+		{1, 2, 3},
+		{1, 2, 3},
+		{3, 2, 1},
+	}
+	res := initCount(prefs)
+
+	if res[1] != 0 {
+		t.Errorf("error, result for 1 should be 0, %d computed", res[1])
+	}
+	if res[2] != 0 {
+		t.Errorf("error, result for 2 should be 0, %d computed", res[2])
+	}
+	if res[3] != 0 {
+		t.Errorf("error, result for 3 should be 0, %d computed", res[3])
+	}
+}
+
 // ---------------------------------------------
 // FONCTIONS DE TEST POUR MAJORITY
 // ---------------------------------------------
 
 func TestMajoritySWF(t *testing.T) {
-	prefs := [][]Alternative{
+	// Cas avec une préférence
+	prefs1 := [][]Alternative{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
 	}
 
-	res, _ := MajoritySWF(prefs)
+	res1, err1 := MajoritySWF(prefs1)
 
-	if res[1] != 2 {
-		t.Errorf("error, result for 1 should be 2, %d computed", res[1])
+	if err1 != nil {
+		t.Errorf("no error should be returned, %s computed", err1)
 	}
-	if res[2] != 0 {
-		t.Errorf("error, result for 2 should be 0, %d computed", res[2])
+
+	if res1[1] != 2 {
+		t.Errorf("error, result for 1 should be 2, %d computed", res1[1])
 	}
-	if res[3] != 1 {
-		t.Errorf("error, result for 3 should be 1, %d computed", res[3])
+	if res1[2] != 0 {
+		t.Errorf("error, result for 2 should be 0, %d computed", res1[2])
 	}
+	if res1[3] != 1 {
+		t.Errorf("error, result for 3 should be 1, %d computed", res1[3])
+	}
+
+	// Cas avec une erreur
+	prefs2 := [][]Alternative{
+		{1, 2, 3},
+		{1, 2, 4},
+		{3, 2, 1},
+	}
+
+	res2, err2 := MajoritySWF(prefs2)
+
+	if err2 == nil {
+		t.Errorf("an error should be returned")
+	}
+	if res2 != nil {
+		t.Errorf("no count result should returned, %T computed", res2)
+	}
+
 }
 
 func TestMajoritySCF(t *testing.T) {
-	prefs := [][]Alternative{
+
+	// Cas avec une seule préférence
+	prefs1 := [][]Alternative{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
 	}
 
-	res, err := MajoritySCF(prefs)
+	res1, err1 := MajoritySCF(prefs1)
 
-	if err != nil {
-		t.Error(err)
+	if err1 != nil {
+		t.Error(err1)
 	}
 
-	if len(res) != 1 || res[0] != 1 {
+	if len(res1) != 1 || res1[0] != 1 {
 		t.Errorf("error, 1 should be the only best Alternative")
+	}
+
+	// Cas avec plusieurs préférences
+	prefs2 := [][]Alternative{
+		{1, 2, 3},
+		{1, 2, 3},
+		{3, 2, 1},
+		{3, 1, 2},
+	}
+
+	res2, err2 := MajoritySCF(prefs2)
+
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	if len(res2) != 2 {
+		t.Errorf("error, there should be two best alternatives")
+	}
+
+	if !((res2[0] == 1 && res2[1] == 3) || (res2[0] == 3 && res2[1] == 1)) {
+		t.Errorf("error, alternatives returned should be 1 and 3, %T computed", res2)
+	}
+
+	// Cas avec une erreur
+	prefs3 := [][]Alternative{
+		{1, 2, 3},
+		{1, 2, 3},
+		{3, 2, 1, 4},
+	}
+
+	res3, err3 := MajoritySCF(prefs3)
+
+	if err3 == nil {
+		t.Errorf("an error should be returned")
+	}
+
+	if len(res3) != 0 {
+		t.Errorf("no canditate should be returned, %T computed", res3)
 	}
 }
 
@@ -148,39 +289,206 @@ func TestMajoritySCF(t *testing.T) {
 // ---------------------------------------------
 
 func TestBordaSWF(t *testing.T) {
-	prefs := [][]Alternative{
+	// Cas avec une préférence
+	prefs1 := [][]Alternative{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
 	}
 
-	res, _ := BordaSWF(prefs)
+	res1, err1 := BordaSWF(prefs1)
 
-	if res[1] != 4 {
-		t.Errorf("error, result for 1 should be 4, %d computed", res[1])
+	if err1 != nil {
+		t.Errorf("no error should be returned, %s computed", err1)
 	}
-	if res[2] != 3 {
-		t.Errorf("error, result for 2 should be 3, %d computed", res[2])
+
+	if res1[1] != 4 {
+		t.Errorf("error, result for 1 should be 4, %d computed", res1[1])
 	}
-	if res[3] != 2 {
-		t.Errorf("error, result for 3 should be 2, %d computed", res[3])
+	if res1[2] != 3 {
+		t.Errorf("error, result for 2 should be 3, %d computed", res1[2])
+	}
+	if res1[3] != 2 {
+		t.Errorf("error, result for 3 should be 2, %d computed", res1[3])
+	}
+
+	// Cas avec une erreur
+	prefs2 := [][]Alternative{
+		{1, 2, 3},
+		{1, 2, 4},
+		{3, 2, 1},
+	}
+
+	res2, err2 := BordaSWF(prefs2)
+
+	if err2 == nil {
+		t.Errorf("an error should be returned")
+	}
+	if res2 != nil {
+		t.Errorf("no count result should returned, %T computed", res2)
 	}
 }
 
 func TestBordaSCF(t *testing.T) {
-	prefs := [][]Alternative{
+	// Cas avec une préférence
+	prefs1 := [][]Alternative{
 		{1, 2, 3},
 		{1, 2, 3},
 		{3, 2, 1},
 	}
 
-	res, err := BordaSCF(prefs)
+	res1, err1 := BordaSCF(prefs1)
 
-	if err != nil {
-		t.Error(err)
+	if err1 != nil {
+		t.Error(err1)
 	}
 
-	if len(res) != 1 || res[0] != 1 {
+	if len(res1) != 1 || res1[0] != 1 {
 		t.Errorf("error, 1 should be the only best Alternative")
 	}
+
+	// Cas avec plusieurs préférences
+	prefs2 := [][]Alternative{
+		{1, 2, 3},
+		{1, 3, 2},
+		{3, 2, 1},
+		{3, 1, 2},
+	}
+
+	res2, err2 := BordaSCF(prefs2)
+
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	if len(res2) != 2 {
+		t.Errorf("error, there should be two best alternatives")
+	}
+
+	if !((res2[0] == 1 && res2[1] == 3) || (res2[0] == 3 && res2[1] == 1)) {
+		t.Errorf("error, alternatives returned should be 1 and 3, %T computed", res2)
+	}
+
+	// Cas avec une erreur
+	prefs3 := [][]Alternative{
+		{1, 2, 3},
+		{1, 2, 3},
+		{3, 2, 1, 4},
+	}
+
+	res3, err3 := BordaSCF(prefs3)
+
+	if err3 == nil {
+		t.Errorf("an error should be returned")
+	}
+
+	if len(res3) != 0 {
+		t.Errorf("no canditate should be returned, %T computed", res3)
+	}
+}
+
+// ---------------------------------------------
+// FONCTIONS DE TEST POUR TIE_BREAK
+// ---------------------------------------------
+
+func TestTieBreakFactory(t *testing.T) {
+
+	TieBreak := TieBreakFactory(nil)
+	if TieBreak != nil {
+		t.Errorf("No function should be returned because no input")
+	}
+
+	orderedAlts := []Alternative{1, 2, 3, 4}
+	TieBreak = TieBreakFactory(orderedAlts)
+	alts := []Alternative{4, 2, 1}
+	res, err := TieBreak(alts)
+	if res != 1 {
+		t.Errorf("the best Alternative should be 1, %d computed", res)
+	}
+	if err != nil {
+		t.Errorf("there should be no error, %s computed", err)
+	}
+
+	alts = []Alternative{5, 6, 7}
+	res, err = TieBreak(alts)
+	if err == nil {
+		t.Error("No order should be known for the alternatives given")
+	}
+	if res != -1 {
+		t.Errorf("No alternative should be chosen, %d computed", res)
+	}
+
+	alts = nil
+	res, err = TieBreak(alts)
+	if err == nil {
+		t.Error("No alternative was given")
+	}
+	if res != -1 {
+		t.Errorf("No alternative should be chosen, %d computed", res)
+	}
+
+}
+
+// ---------------------------------------------
+// FONCTIONS DE TEST POUR SWFFACTORY
+// ---------------------------------------------
+
+// ---------------------------------------------
+// FONCTIONS DE TEST POUR SCFFACTORY
+// ---------------------------------------------
+
+// ---------------------------------------------
+// FONCTIONS DE TEST POUR CONDORCETWINNER
+// ---------------------------------------------
+
+func TestCondorcetWinner(t *testing.T) {
+	// Cas avec un gagnant de condorcet
+	prefs1 := [][]Alternative{
+		{1, 2, 3},
+		{1, 3, 2},
+		{3, 2, 1},
+	}
+	// 1 est le gagnant de condorcet
+
+	res1, err1 := CondorcetWinner(prefs1)
+
+	if err1 != nil {
+		t.Errorf("no error should be returned, %s computed", err1)
+	}
+	if len(res1) == 0 || res1[0] != 1 {
+		t.Errorf("error, result should be 1, %d computed", res1[0])
+	}
+
+	// Cas avec aucun gagnant de condorcet
+	prefs2 := [][]Alternative{
+		{1, 2, 3},
+		{2, 3, 1},
+		{3, 1, 2},
+	}
+
+	res2, err2 := CondorcetWinner(prefs2)
+
+	if err2 != nil {
+		t.Errorf("no error should be returned, %s computed", err2)
+	}
+	if len(res2) != 0 {
+		t.Errorf("there should be no condorcer winner, %T computed", res2)
+	}
+
+	// Cas avec une erreur
+	prefs3 := [][]Alternative{
+		{1, 2, 3},
+		{1, 2, 1},
+		{3, 2, 1},
+	}
+
+	res3, err3 := CondorcetWinner(prefs3)
+
+	if err3 == nil {
+		t.Errorf("an error should be returned")
+	}
+	if res3 != nil {
+		t.Errorf("no count result should returned, %T computed", res3)
+	}
+
 }
