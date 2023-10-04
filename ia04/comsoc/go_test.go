@@ -619,6 +619,8 @@ func TestSWFFactory(t *testing.T) {
 		{1, 2, 3},
 		{3, 2, 1},
 		{3, 1, 2},
+		{2, 1, 3},
+		{2, 3, 1},
 	}
 	orderedAlts := []Alternative{1, 2, 3}
 	TieBreak := TieBreakFactory(orderedAlts)
@@ -630,10 +632,10 @@ func TestSWFFactory(t *testing.T) {
 		t.Errorf("no error should be returned, %s computed", err1)
 	}
 
-	if res1[1] != 3 {
+	if res1[1] != 4 {
 		t.Errorf("error, result for 1 should be 3, %d computed", res1[1])
 	}
-	if res1[2] != 0 {
+	if res1[2] != 3 {
 		t.Errorf("error, result for 2 should be 0, %d computed", res1[2])
 	}
 	if res1[3] != 2 {
@@ -722,7 +724,7 @@ func TestSWFFactory(t *testing.T) {
 		t.Errorf("an error should be returned")
 	}
 	if res4 != nil {
-		t.Errorf("no count result should returned, %T computed", res3)
+		t.Errorf("no count result should returned, %T computed", res4)
 	}
 }
 
