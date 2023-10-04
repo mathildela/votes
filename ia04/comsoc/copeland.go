@@ -1,0 +1,46 @@
+package comsoc
+
+func CopelandSWF(p Profile) (count Count, err error) {
+	alts := getAlternatives(p)
+	err = checkProfileAlternative(p, alts)
+	if err != nil {
+		return nil, err
+	} else {
+		count := initCount(p)
+		for _, a1 := range alts {
+			for _, a2 := range alts {
+				sum1, sum2 := 0, 0
+				if a1 != a2 {
+					for _, pref := range p {
+						if isPref(a1, a2, pref) {
+							sum1++
+						} else {
+							sum2++
+						}
+					}
+					if sum1 > sum2 {
+						//vérification des préférences. Comment gérer égalité ?
+						// ici on considère que si égalité, pas de point attribué
+						count[a1]++
+						count[a2]--
+					} else {
+						if sum1 < sum2 {
+							count[a2]++
+							count[a1]--
+						}
+					}
+				}
+			}
+		}
+		// on divise les scores par 2 car chaque duo de candidats se sont affrontés 2 fois
+		for key, value := range count {
+			count[key] = value / 2
+		}
+		return count, nil
+	}
+}
+
+func CopelandSCF(p Profile) (bestAlts []Alternative, err error) {
+	count, err := CopelandSWF(p)
+	return maxCount(count), err
+}

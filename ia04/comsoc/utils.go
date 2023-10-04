@@ -48,6 +48,24 @@ func maxCount(count Count) (bestAlts []Alternative) {
 	return bestAlts
 }
 
+func minCount(count Count) (worseAlts []Alternative) {
+	var min int = 100000000
+	worseAlts = make([]Alternative, 0)
+	for key, val := range count {
+		if val < min {
+			worseAlts = nil //vider
+			worseAlts = append(worseAlts, key)
+			min = val
+		} else {
+			if val == min {
+				worseAlts = append(worseAlts, key)
+				min = val
+			}
+		}
+	}
+	return worseAlts
+}
+
 func contains(alts []Alternative, alt Alternative) bool {
 	for _, value := range alts {
 		if value == alt {
@@ -126,6 +144,25 @@ func TieBreakFactory(orderedAlts []Alternative) func([]Alternative) (Alternative
 				err := errors.New("No alternative")
 				return -1, err
 			} else {
+				// On vérifie que toutes les alternatives de bestAlts sont présentes dans orderedAlts
+				for _, alt := range bestAlts {
+					if !contains(orderedAlts, alt) {
+						err := errors.New("At least one alternative missing in orderedAlts")
+						return -1, err
+					}
+				}
+
+				// On vérifie qu'il n'y a pas de doublons dans bestAlts
+				var verif_alts []Alternative
+				for _, value := range orderedAlts {
+					if contains(verif_alts, value) {
+						err := errors.New("Alternative not unique")
+						return -1, err
+					} else {
+						verif_alts = append(verif_alts, value)
+					}
+				}
+
 				for _, alt := range orderedAlts {
 					if contains(bestAlts, alt) {
 						return alt, nil
@@ -141,7 +178,7 @@ func TieBreakFactory(orderedAlts []Alternative) func([]Alternative) (Alternative
 func allDifferentCount(count Count) bool {
 	for key1, value1 := range count {
 		for key2, value2 := range count {
-			if key1 == key2 && value1 == value2 {
+			if key1 != key2 && value1 == value2 {
 				return false
 			}
 		}
@@ -163,15 +200,15 @@ func SWFFactory(swf func(p Profile) (Count, error), tiebreak func([]Alternative)
 				for allDifferentCount(count) != true {
 					for key1, value1 := range count {
 						for key2, value2 := range count {
-							if value1 == value2 && key1 == key2 {
+							if value1 == value2 && key1 != key2 {
 								bestalt, err := tiebreak([]Alternative{key1, key2})
 								if err != nil {
 									return nil, err
 								} else {
 									if bestalt == key1 {
-										value1++
+										count[key1]++
 									} else {
-										value2++
+										count[key2]++
 									}
 								}
 							}
@@ -197,6 +234,30 @@ func SCFFactory(scf func(p Profile) ([]Alternative, error), tiebreak func([]Alte
 			} else {
 				return tiebreak(bestAlts)
 			}
+		}
+	}
+}
+
+func remove(prefs []Alternative, i Alternative) []Alternative {
+	prefs[i] = prefs[len(prefs)-1]
+	return prefs[:len(prefs)-1]
+}
+
+func removeAlt(p Profile, alt Alternative) (new_p Profile, err error) {
+	alts := getAlternatives(p)
+	err = checkProfileAlternative(p, alts)
+	if err != nil {
+		return nil, err
+	} else {
+		copy(new_p, p)
+		for _, prefs := range new_p {
+			prefs = remove(prefs, alt)
+		}
+		err = checkProfileAlternative(new_p, alts)
+		if err != nil {
+			return nil, err
+		} else {
+			return new_p, nil
 		}
 	}
 }
