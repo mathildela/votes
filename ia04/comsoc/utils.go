@@ -8,9 +8,9 @@ type Alternative int
 type Profile [][]Alternative
 type Count map[Alternative]int
 
-// renvoie l'indice ou se trouve alt dans prefs
+// renvoie l'indice oà se trouve alt dans prefs
 func rank(alt Alternative, prefs []Alternative) int {
-	var ind int
+	var ind int = -1
 	for i := 0; i < len(prefs); i++ {
 		if prefs[i] == alt {
 			ind = i
@@ -50,6 +50,31 @@ func contains(alts []Alternative, alt Alternative) bool {
 		}
 	}
 	return false
+}
+
+// vérifie les préférences d'un agent, par ex. qu'ils sont tous complets et que chaque alternative n'apparaît qu'une seule fois
+
+func checkPrefs(prefs []Alternative, alts []Alternative) error {
+	//vérification compléture
+	if len(prefs) != len(alts) {
+		err := fmt.Errorf("err : préférences incomplètes")
+		return err
+	}
+
+	//vérification unicité alternative
+	var verif []Alternative
+	var err error
+	for i := 0; i < len(prefs); i++ {
+		if contains(verif, prefs[i]) {
+			err = fmt.Errorf("err : préférences non uniques pour votant %d", i)
+		}
+		if !contains(alts, prefs[i]) {
+			err = fmt.Errorf("err : alternative %d pas dans la liste alts", prefs[i])
+		}
+		verif = append(verif, prefs[i])
+	}
+	return err
+
 }
 
 // vérifie le profil donné, par ex. qu'ils sont tous complets et que chaque alternative n'apparaît qu'une seule fois par préférences
@@ -105,4 +130,67 @@ func checkProfileAlternative(prefs Profile, alts []Alternative) error {
 		}
 	}
 	return err
+}
+
+func initCount(p Profile) (count Count) {
+	count = Count{}
+	for cpt := 0; cpt < len(p[0]); cpt++ {
+		count[p[0][cpt]] = 0
+	}
+	return count
+}
+
+// fonction de Solenn
+// func allDifferentCount(count Count) bool {
+// 	for key1, value1 := range count {
+// 		for key2, value2 := range count {
+// 			if key1 != key2 && value1 == value2 {
+// 				return false
+// 			}
+// 		}
+// 	}
+// 	return true
+// }
+
+func copyProfile(source Profile) (destination Profile) {
+	destination = make([][]Alternative, len(source))
+	for i := range destination {
+		destination[i] = make([]Alternative, len(source[0]))
+	}
+	for i := 0; i < len(source); i++ {
+		for j := 0; j < len(source[0]); j++ {
+			destination[i][j] = source[i][j]
+		}
+	}
+	return destination
+}
+
+func removeElement(prefs []Alternative, i Alternative) []Alternative {
+	var result []Alternative
+	for _, v := range prefs {
+		if v != i {
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
+func removeAlt(p Profile, alt Alternative) (new_p Profile, err error) {
+	alts := p[0]
+	err = checkProfileAlternative(p, alts)
+	if err != nil {
+		return nil, err
+	} else {
+		var new_p Profile
+		for _, prefs := range p {
+			prefs = removeElement(prefs, alt)
+			new_p = append(new_p, prefs)
+		}
+		err = checkProfileAlternative(new_p, alts)
+		if err != nil {
+			return nil, err
+		} else {
+			return new_p, nil
+		}
+	}
 }
