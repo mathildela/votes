@@ -2,6 +2,7 @@ package comsoc
 
 import (
 	"errors"
+	"fmt"
 )
 
 type Alternative int
@@ -78,6 +79,9 @@ func contains(alts []Alternative, alt Alternative) bool {
 // vérifie les préférences d'un agent, par ex. qu'ils sont tous complets et que chaque alternative n'apparaît qu'une seule fois
 func checkProfile(prefs []Alternative, alts []Alternative) error {
 	// Check if no candidat is missing
+	fmt.Println(prefs)
+	fmt.Println(alts)
+
 	if len(prefs) != len(alts) {
 		return errors.New("Too much or too few candidates in preference")
 	}
@@ -238,22 +242,42 @@ func SCFFactory(scf func(p Profile) ([]Alternative, error), tiebreak func([]Alte
 	}
 }
 
-func remove(prefs []Alternative, i Alternative) []Alternative {
-	prefs[i] = prefs[len(prefs)-1]
-	return prefs[:len(prefs)-1]
+func copyProfile(source Profile) (destination Profile) {
+	destination = make([][]Alternative, len(source))
+	for i := range destination {
+		destination[i] = make([]Alternative, len(source[0]))
+	}
+	for i := 0; i < len(source); i++ {
+		for j := 0; j < len(source[0]); j++ {
+			destination[i][j] = source[i][j]
+		}
+	}
+	return destination
+}
+
+func removeElement(prefs []Alternative, i Alternative) []Alternative {
+	var result []Alternative
+	for _, v := range prefs {
+		if v != i {
+			result = append(result, v)
+		}
+	}
+	return result
 }
 
 func removeAlt(p Profile, alt Alternative) (new_p Profile, err error) {
-	alts := getAlternatives(p)
+	alts := p[0]
 	err = checkProfileAlternative(p, alts)
 	if err != nil {
 		return nil, err
 	} else {
-		copy(new_p, p)
-		for _, prefs := range new_p {
-			prefs = remove(prefs, alt)
+		var new_p Profile
+		for _, prefs := range p {
+			prefs = removeElement(prefs, alt)
+			new_p = append(new_p, prefs)
 		}
-		err = checkProfileAlternative(new_p, alts)
+
+		err = checkProfileAlternative(new_p, new_p[0])
 		if err != nil {
 			return nil, err
 		} else {

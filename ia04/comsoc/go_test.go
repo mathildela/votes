@@ -1002,3 +1002,31 @@ func TestCopelandSCF(t *testing.T) {
 // ---------------------------------------------
 // FONCTIONS DE TEST POUR STV
 // ---------------------------------------------
+
+func TestSTVSWF(t *testing.T) {
+	// Cas avec une préférence
+	prefs1 := [][]Alternative{
+		{1, 2, 3, 4},
+		{2, 3, 4, 1},
+		{4, 3, 1, 2},
+	}
+
+	res1, err1 := STV_SWF(prefs1)
+
+	if err1 != nil {
+		t.Errorf("no error should be returned, %s computed", err1)
+	}
+
+	if res1[1] != 0 {
+		t.Errorf("error, result for 1 should be 1, %d computed", res1[1])
+	}
+	if res1[2] != 0 {
+		t.Errorf("error, result for 2 should be 0, %d computed", res1[2])
+	}
+	if res1[3] != 0 {
+		t.Errorf("error, result for 3 should be 0, %d computed", res1[3])
+	}
+	if res1[4] != 1 {
+		t.Errorf("error, result for 4 should be 0, %d computed", res1[4])
+	}
+}
