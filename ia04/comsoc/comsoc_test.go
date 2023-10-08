@@ -746,15 +746,15 @@ func TestCopelandSCF(t *testing.T) {
 
 func TestSTV_SWF(t *testing.T) {
 	prefs1 := [][]Alternative{
-		{1, 2, 3},
-		{3, 1, 2},
-		{3, 1, 2},
+		{1, 2, 3, 4},
+		{2, 3, 4, 1},
+		{4, 3, 1, 2},
 	}
 
 	res, err := STV_SWF(prefs1)
 
-	if res[3] != 1 {
-		t.Errorf("the winner should be 3")
+	if res[2] != 2 {
+		t.Errorf("the winner should be 1")
 	}
 
 	if err != nil {
