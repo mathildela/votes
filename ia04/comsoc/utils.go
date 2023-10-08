@@ -2,7 +2,6 @@ package comsoc
 
 import (
 	"errors"
-	"fmt"
 )
 
 type Alternative int
@@ -79,9 +78,6 @@ func contains(alts []Alternative, alt Alternative) bool {
 // vérifie les préférences d'un agent, par ex. qu'ils sont tous complets et que chaque alternative n'apparaît qu'une seule fois
 func checkProfile(prefs []Alternative, alts []Alternative) error {
 	// Check if no candidat is missing
-	fmt.Println(prefs)
-	fmt.Println(alts)
-
 	if len(prefs) != len(alts) {
 		return errors.New("Too much or too few candidates in preference")
 	}
@@ -111,15 +107,6 @@ func checkProfileAlternative(prefs Profile, alts []Alternative) error {
 		}
 	}
 	return nil
-}
-
-func getAlternatives(prefs Profile) []Alternative {
-	// The first profile is taken as  (if there is duplicates it will be stopped by the checkProfile function)
-	var alts []Alternative
-	for _, value := range prefs[0] {
-		alts = append(alts, value)
-	}
-	return alts
 }
 
 // initialise le count, c'est-à-dire créé une clé pour chaque alternative et leur donne 0 comme valeur

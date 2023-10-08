@@ -1,14 +1,13 @@
 package comsoc
 
 func CopelandSWF(p Profile) (count Count, err error) {
-	alts := getAlternatives(p)
-	err = checkProfileAlternative(p, alts)
+	err = checkProfileAlternative(p, p[0])
 	if err != nil {
 		return nil, err
 	} else {
 		count := initCount(p)
-		for _, a1 := range alts {
-			for _, a2 := range alts {
+		for _, a1 := range p[0] {
+			for _, a2 := range p[0] {
 				sum1, sum2 := 0, 0
 				if a1 != a2 {
 					for _, pref := range p {

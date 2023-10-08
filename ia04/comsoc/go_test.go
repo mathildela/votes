@@ -1007,7 +1007,16 @@ func TestSTVSWF(t *testing.T) {
 	// Cas avec une préférence
 	prefs1 := [][]Alternative{
 		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
 		{2, 3, 4, 1},
+		{2, 3, 4, 1},
+		{2, 3, 4, 1},
+		{2, 3, 4, 1},
+		{4, 3, 1, 2},
+		{4, 3, 1, 2},
 		{4, 3, 1, 2},
 	}
 
@@ -1017,7 +1026,7 @@ func TestSTVSWF(t *testing.T) {
 		t.Errorf("no error should be returned, %s computed", err1)
 	}
 
-	if res1[1] != 0 {
+	if res1[1] != 1 {
 		t.Errorf("error, result for 1 should be 1, %d computed", res1[1])
 	}
 	if res1[2] != 0 {
@@ -1026,7 +1035,126 @@ func TestSTVSWF(t *testing.T) {
 	if res1[3] != 0 {
 		t.Errorf("error, result for 3 should be 0, %d computed", res1[3])
 	}
-	if res1[4] != 1 {
+	if res1[4] != 0 {
 		t.Errorf("error, result for 4 should be 0, %d computed", res1[4])
+	}
+
+	// Cas avec une égalité dans la majorité
+	prefs2 := [][]Alternative{
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{2, 3, 4, 1},
+		{2, 3, 4, 1},
+		{2, 3, 4, 1},
+		{4, 3, 1, 2},
+		{4, 3, 2, 1},
+	}
+
+	res2, err2 := STV_SWF(prefs2)
+
+	if err2 != nil {
+		t.Errorf("no error should be returned, %s computed", err2)
+	}
+
+	if res2[1] != 1 {
+		t.Errorf("error, result for 1 should be 1, %d computed", res2[1])
+	}
+	if res2[2] != 0 {
+		t.Errorf("error, result for 2 should be 0, %d computed", res2[2])
+	}
+	if res2[3] != 0 {
+		t.Errorf("error, result for 3 should be 0, %d computed", res2[3])
+	}
+	if res2[4] != 0 {
+		t.Errorf("error, result for 4 should be 0, %d computed", res2[4])
+	}
+
+	// Cas avec une erreur
+	prefs3 := [][]Alternative{
+		{2, 3, 5, 1},
+		{4, 3, 1, 2},
+		{4, 3, 2, 1},
+	}
+
+	res3, err3 := STV_SWF(prefs3)
+
+	if err3 == nil {
+		t.Errorf("an error should be returned")
+	}
+	if len(res3) != 0 {
+		t.Errorf("no count result should returned, %T computed", res3)
+	}
+}
+
+func TestSTVSCF(t *testing.T) {
+	// Cas avec une préférence
+	prefs1 := [][]Alternative{
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{2, 3, 4, 1},
+		{2, 3, 4, 1},
+		{2, 3, 4, 1},
+		{2, 3, 4, 1},
+		{4, 3, 1, 2},
+		{4, 3, 1, 2},
+		{4, 3, 1, 2},
+	}
+
+	res1, err1 := STV_SCF(prefs1)
+
+	if err1 != nil {
+		t.Errorf("no error should be returned, %s computed", err1)
+	}
+
+	if len(res1) != 1 {
+		t.Errorf("error, only one alternative should be given, %v computed", res1)
+	}
+	if res1[0] != 1 {
+		t.Errorf("error, result for 1 should be 1, %d computed", res1[0])
+	}
+
+	// Cas avec une égalité dans la majorité
+	prefs2 := [][]Alternative{
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{1, 2, 3, 4},
+		{2, 3, 4, 1},
+		{2, 3, 4, 1},
+		{2, 3, 4, 1},
+		{4, 3, 1, 2},
+		{4, 3, 2, 1},
+	}
+
+	res2, err2 := STV_SCF(prefs2)
+
+	if err2 != nil {
+		t.Errorf("no error should be returned, %s computed", err2)
+	}
+
+	if len(res2) != 1 {
+		t.Errorf("error, only one alternative should be given, %v computed", res2)
+	}
+	if res2[0] != 1 {
+		t.Errorf("error, result for 1 should be 1, %d computed", res2[0])
+	}
+
+	// Cas avec une erreur
+	prefs3 := [][]Alternative{
+		{2, 3, 5, 1},
+		{4, 3, 1, 2},
+		{4, 3, 2, 1},
+	}
+
+	res3, err3 := STV_SCF(prefs3)
+
+	if err3 == nil {
+		t.Errorf("an error should be returned")
+	}
+	if len(res3) != 0 {
+		t.Errorf("no count result should returned, %T computed", res3)
 	}
 }

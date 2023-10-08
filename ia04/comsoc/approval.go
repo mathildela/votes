@@ -9,8 +9,7 @@ func ApprovalSWF(p Profile, thresholds []int) (count Count, err error) {
 		err := errors.New("Uncomplete threshold list")
 		return nil, err
 	}
-	alts := getAlternatives(p)
-	err = checkProfileAlternative(p, alts)
+	err = checkProfileAlternative(p, p[0])
 	if err != nil {
 		return nil, err
 	} else {

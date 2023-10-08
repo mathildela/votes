@@ -1,8 +1,7 @@
 package comsoc
 
 func BordaSWF(p Profile) (count Count, err error) {
-	alts := getAlternatives(p)
-	err = checkProfileAlternative(p, alts)
+	err = checkProfileAlternative(p, p[0])
 	if err != nil {
 		return nil, err
 	} else {
