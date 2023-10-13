@@ -1,13 +1,12 @@
-package restclientagent
+package voteragent
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"ia04/comsoc"
 	"log"
 	"net/http"
-
-	rad "gitlab.utc.fr/lagruesy/ia04/demos/restagentdemo"
 )
 
 type RestClientAgent struct {
@@ -26,14 +25,14 @@ func (rca *RestClientAgent) treatResponse(r *http.Response) int {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 
-	var resp rad.Response
+	var resp comsoc.Response
 	json.Unmarshal(buf.Bytes(), &resp)
 
 	return resp.Result
 }
 
 func (rca *RestClientAgent) doRequest() (res int, err error) {
-	req := rad.Request{
+	req := comsoc.Request{
 		Operator: rca.operator,
 		Args:     [2]int{rca.arg1, rca.arg2},
 	}

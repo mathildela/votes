@@ -1,15 +1,14 @@
-package restserveragent
+package ballotagent
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"ia04/comsoc"
 	"log"
 	"net/http"
 	"sync"
 	"time"
-
-	rad "gitlab.utc.fr/lagruesy/ia04/demos/restagentdemo"
 )
 
 type RestServerAgent struct {
@@ -33,7 +32,7 @@ func (rsa *RestServerAgent) checkMethod(method string, w http.ResponseWriter, r 
 	return true
 }
 
-func (*RestServerAgent) decodeRequest(r *http.Request) (req rad.Request, err error) {
+func (*RestServerAgent) decodeRequest(r *http.Request) (req comsoc.Request, err error) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 	err = json.Unmarshal(buf.Bytes(), &req)
@@ -60,7 +59,7 @@ func (rsa *RestServerAgent) doCalc(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// traitement de la requête
-	var resp rad.Response
+	var resp comsoc.Response
 
 	switch req.Operator {
 	// Ici on gère le choix de mot et appelle les bonnes fonctions

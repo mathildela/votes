@@ -8,6 +8,16 @@ type Alternative int
 type Profile [][]Alternative
 type Count map[Alternative]int
 
+// type pour client-serveur
+type Request struct {
+	Operator string `json:"op"`
+	Args     [2]int `json:"args"`
+}
+
+type Response struct {
+	Result int `json:"res"`
+}
+
 // renvoie l'indice ou se trouve alt dans prefs
 func rank(alt Alternative, prefs []Alternative) int {
 	for idx := range prefs {

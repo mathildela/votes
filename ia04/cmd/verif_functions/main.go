@@ -2,32 +2,41 @@ package main
 
 import (
 	"fmt"
+	"ia04/agt/ballotagent"
 	"ia04/agt/voteragent"
-	"ia04/comsoc"
-	"time"
+	"log"
+	"math/rand"
 )
 
-const nb_agents int = 10
-const nb_candidats int = 5
-
 func main() {
-	// pas de channel dans l'exemple car on va le faire en client/serveur ?
-	c := make(chan []comsoc.Alternative)
-	//p := make(comsoc.Profile, nb_agents)
-	for i := 0; i < nb_agents; i++ {
-		go func(i int) {
-			a := voteragent.NewAgent("1", "A1", nb_candidats)
-			//a.Start()
-			new_slice := make([]comsoc.Alternative, len(a.Prefs))
-			copy(new_slice, a.Prefs)
-			c <- new_slice
-		}(i)
+	const n = 100
+	const url1 = ":8080"
+	const url2 = "http://localhost:8080"
+	ops := [...]string{"+", "-", "*"}
+
+	clAgts := make([]voteragent.RestClientAgent, 0, n)
+	servAgt := ballotagent.NewRestServerAgent(url1)
+
+	log.Println("démarrage du serveur...")
+	go servAgt.Start()
+
+	log.Println("démarrage des clients...")
+	for i := 0; i < n; i++ {
+		id := fmt.Sprintf("id%02d", i)
+		op := ops[rand.Intn(3)]
+		op1 := rand.Intn(100)
+		op2 := rand.Intn(100)
+		agt := voteragent.NewRestClientAgent(id, url2, op, op1, op2)
+		clAgts = append(clAgts, *agt) //Fais un slice d'agents
 	}
-	time.Sleep(3 * time.Second)
-	// on ne peut pas transmettre un slice dans un channel
-	/*
-		    for i:=0; i<nb_agents;i++{
-				p[i] <- c
-			}*/
+
+	for _, agt := range clAgts {
+		// attention, obligation de passer par cette lambda pour faire capturer la valeur de l'itération par la goroutine
+		// pour récupérer la bonne valeur du pointeur qui va sur l'agent
+		func(agt voteragent.RestClientAgent) {
+			go agt.Start()
+		}(agt)
+	}
+
 	fmt.Scanln()
 }
