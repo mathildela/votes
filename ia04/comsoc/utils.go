@@ -1,30 +1,35 @@
 package comsoc
 
 import (
-	"fmt"
+	"errors"
 )
 
 type Alternative int
 type Profile [][]Alternative
 type Count map[Alternative]int
 
-// renvoie l'indice oà se trouve alt dans prefs
+// renvoie l'indice ou se trouve alt dans prefs
 func rank(alt Alternative, prefs []Alternative) int {
-	var ind int = -1
-	for i := 0; i < len(prefs); i++ {
-		if prefs[i] == alt {
-			ind = i
+	for idx := range prefs {
+		if prefs[idx] == alt {
+			return idx
 		}
 	}
-	return ind
+	return -1
 }
 
 // renvoie vrai ssi alt1 est préférée à alt2
+// renvoie faux si alt1 ou alt2 n'est pas une alternative de prefs
 func isPref(alt1, alt2 Alternative, prefs []Alternative) bool {
+	if rank(alt1, prefs) == -1 || rank(alt2, prefs) == -1 {
+		return false
+	}
+
 	return rank(alt1, prefs) < rank(alt2, prefs)
 }
 
-// renvoie les meilleures alternatives pour un décomtpe donné
+// renvoie les meilleures alternatives pour un décompte donné
+// Vérifier avec plusieurs tests
 func maxCount(count Count) (bestAlts []Alternative) {
 	var max int = -1
 	bestAlts = make([]Alternative, 0)
@@ -43,9 +48,27 @@ func maxCount(count Count) (bestAlts []Alternative) {
 	return bestAlts
 }
 
+func minCount(count Count) (worseAlts []Alternative) {
+	var min int = 100000000
+	worseAlts = make([]Alternative, 0)
+	for key, val := range count {
+		if val < min {
+			worseAlts = nil //vider
+			worseAlts = append(worseAlts, key)
+			min = val
+		} else {
+			if val == min {
+				worseAlts = append(worseAlts, key)
+				min = val
+			}
+		}
+	}
+	return worseAlts
+}
+
 func contains(alts []Alternative, alt Alternative) bool {
-	for _, s := range alts {
-		if alt == s {
+	for _, value := range alts {
+		if value == alt {
 			return true
 		}
 	}
@@ -53,104 +76,158 @@ func contains(alts []Alternative, alt Alternative) bool {
 }
 
 // vérifie les préférences d'un agent, par ex. qu'ils sont tous complets et que chaque alternative n'apparaît qu'une seule fois
-
-func checkPrefs(prefs []Alternative, alts []Alternative) error {
-	//vérification compléture
+func checkProfile(prefs []Alternative, alts []Alternative) error {
+	// Check if no candidat is missing
 	if len(prefs) != len(alts) {
-		err := fmt.Errorf("err : préférences incomplètes")
-		return err
+		return errors.New("Too much or too few candidates in preference")
 	}
 
-	//vérification unicité alternative
-	var verif []Alternative
-	var err error
-	for i := 0; i < len(prefs); i++ {
-		if contains(verif, prefs[i]) {
-			err = fmt.Errorf("err : préférences non uniques pour votant %d", i)
-		}
-		if !contains(alts, prefs[i]) {
-			err = fmt.Errorf("err : alternative %d pas dans la liste alts", prefs[i])
-		}
-		verif = append(verif, prefs[i])
-	}
-	return err
-
-}
-
-// vérifie le profil donné, par ex. qu'ils sont tous complets et que chaque alternative n'apparaît qu'une seule fois par préférences
-func checkProfile(prefs Profile) error {
-	//vérification complétude
-	lenght := len(prefs[0])
-	for i := 0; i < len(prefs); i++ {
-		if len(prefs[i]) != lenght {
-			err := fmt.Errorf("err : profile incomplet pour %d", i)
-			return err
-		}
-	}
-
-	//vérification unicité alternative
-	var verif []Alternative
-	var err error
-	for i := 0; i < len(prefs); i++ {
-		verif = nil
-		for j := 0; j < len(prefs[0]); j++ {
-			if contains(verif, prefs[i][j]) {
-				err = fmt.Errorf("err : préférences non uniques pour votant %d", i)
+	var verif_alts []Alternative
+	for _, value := range prefs {
+		// check if there are duplicated alternatives
+		if contains(verif_alts, value) {
+			return errors.New("Alternative not unique")
+		} else {
+			// check if there is alternative not in alts
+			if !contains(alts, value) {
+				return errors.New("Unexpected alternative")
+			} else {
+				verif_alts = append(verif_alts, value)
 			}
-			verif = append(verif, prefs[i][j])
 		}
 	}
-	return err
+	return nil
 }
 
-// vérifie le profil donné, par ex. qu'ils sont tous complets et que chaque alternative de alts apparaît exactement une fois par préférences
 func checkProfileAlternative(prefs Profile, alts []Alternative) error {
-	//vérification complétude
-	lenght := len(prefs[0])
-	for i := 0; i < len(prefs); i++ {
-		if len(prefs[i]) != lenght {
-			err := fmt.Errorf("err : profile incomplet pour %d", i)
-			return err
+	for _, p := range prefs {
+		error := checkProfile(p, alts)
+		if error != nil {
+			return error
 		}
 	}
-
-	//vérification unicité alternative
-	var verif []Alternative
-	var err error
-	for i := 0; i < len(prefs); i++ {
-		verif = nil
-		for j := 0; j < len(prefs[0]); j++ {
-			if contains(verif, prefs[i][j]) {
-				err = fmt.Errorf("err : préférences non uniques pour votant %d", i)
-			}
-			if !contains(alts, prefs[i][j]) {
-				err = fmt.Errorf("err : alternative %d pas dans la liste alts", prefs[i][j])
-			}
-			verif = append(verif, prefs[i][j])
-		}
-	}
-	return err
+	return nil
 }
 
+// initialise le count, c'est-à-dire créé une clé pour chaque alternative et leur donne 0 comme valeur
 func initCount(p Profile) (count Count) {
-	count = Count{}
-	for cpt := 0; cpt < len(p[0]); cpt++ {
-		count[p[0][cpt]] = 0
+	count = make(Count)
+	for _, profile := range p {
+		for i := 0; i < len(profile); i++ {
+			_, check := count[profile[i]]
+			// check = true if the value already exists in count
+			if !check {
+				count[profile[i]] = 0
+			}
+		}
 	}
 	return count
 }
 
-// fonction de Solenn
-// func allDifferentCount(count Count) bool {
-// 	for key1, value1 := range count {
-// 		for key2, value2 := range count {
-// 			if key1 != key2 && value1 == value2 {
-// 				return false
-// 			}
-// 		}
-// 	}
-// 	return true
-// }
+// TieBreak
+
+func TieBreakFactory(orderedAlts []Alternative) func([]Alternative) (Alternative, error) {
+	if len(orderedAlts) == 0 {
+		return nil
+	} else {
+		return func(bestAlts []Alternative) (Alternative, error) {
+			if len(bestAlts) == 0 {
+				err := errors.New("No alternative")
+				return -1, err
+			} else {
+				// On vérifie que toutes les alternatives de bestAlts sont présentes dans orderedAlts
+				for _, alt := range bestAlts {
+					if !contains(orderedAlts, alt) {
+						err := errors.New("At least one alternative missing in orderedAlts")
+						return -1, err
+					}
+				}
+
+				// On vérifie qu'il n'y a pas de doublons dans bestAlts
+				var verif_alts []Alternative
+				for _, value := range orderedAlts {
+					if contains(verif_alts, value) {
+						err := errors.New("Alternative not unique")
+						return -1, err
+					} else {
+						verif_alts = append(verif_alts, value)
+					}
+				}
+
+				for _, alt := range orderedAlts {
+					if contains(bestAlts, alt) {
+						return alt, nil
+					}
+				}
+				err := errors.New("No common alternative between orderedAlts and bestAlts")
+				return -1, err
+			}
+		}
+	}
+}
+
+func allDifferentCount(count Count) bool {
+	for key1, value1 := range count {
+		for key2, value2 := range count {
+			if key1 != key2 && value1 == value2 {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// SWF doivent renvoyer un ordre total sans égalité
+// Les SWF doivent renvoyer des counts à la fin (différence avec le sujet)
+func SWFFactory(swf func(p Profile) (Count, error), tiebreak func([]Alternative) (Alternative, error)) func(Profile) (Count, error) {
+	if swf == nil || tiebreak == nil {
+		return nil
+	} else {
+		return func(p Profile) (Count, error) {
+			count, err := swf(p)
+			if err != nil {
+				return nil, err
+			} else {
+				for allDifferentCount(count) != true {
+					for key1, value1 := range count {
+						for key2, value2 := range count {
+							if value1 == value2 && key1 != key2 {
+								bestalt, err := tiebreak([]Alternative{key1, key2})
+								if err != nil {
+									return nil, err
+								} else {
+									if bestalt == key1 {
+										count[key1]++
+									} else {
+										count[key2]++
+									}
+								}
+							}
+						}
+					}
+				}
+				return count, nil
+			}
+		}
+	}
+}
+
+// SCF doivent renvoyer un seul élement
+func SCFFactory(scf func(p Profile) ([]Alternative, error), tiebreak func([]Alternative) (Alternative, error)) func(Profile) (Alternative, error) {
+	if scf == nil || tiebreak == nil {
+		return nil
+	} else {
+		return func(p Profile) (Alternative, error) {
+			bestAlts, err := scf(p)
+
+			if err != nil {
+				return -1, err
+			} else {
+				return tiebreak(bestAlts)
+			}
+		}
+	}
+}
 
 func copyProfile(source Profile) (destination Profile) {
 	destination = make([][]Alternative, len(source))
@@ -186,7 +263,8 @@ func removeAlt(p Profile, alt Alternative) (new_p Profile, err error) {
 			prefs = removeElement(prefs, alt)
 			new_p = append(new_p, prefs)
 		}
-		err = checkProfileAlternative(new_p, alts)
+
+		err = checkProfileAlternative(new_p, new_p[0])
 		if err != nil {
 			return nil, err
 		} else {

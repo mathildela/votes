@@ -1,33 +1,31 @@
 package comsoc
 
-// func ApprovalSWF(p Profile, thresholds []int) (count Count, err error)
-// func ApprovalSCF(p Profile, thresholds []int) (bestAlts []Alternative, err error)
+import (
+	"errors"
+)
 
 func ApprovalSWF(p Profile, thresholds []int) (count Count, err error) {
-	//vérifications
+	if len(thresholds) == 0 || len(thresholds) != len(p) {
+		err := errors.New("Uncomplete threshold list")
+		return nil, err
+	}
 	err = checkProfileAlternative(p, p[0])
 	if err != nil {
 		return nil, err
-	}
-
-	count = Count{}
-	for cpt := 0; cpt < len(p[0]); cpt++ {
-		count[p[0][cpt]] = 0 //initialise la map
-	}
-
-	for i := 0; i < len(p); i++ {
-		for j := 0; j < len(p[0]); j++ {
-			if j < thresholds[i] {
-				count[p[i][j]] += 1
+	} else {
+		count = initCount(p)
+		// On parcourt les préférences des votants
+		for idx1 := 0; idx1 < len(p); idx1++ {
+			// On ajoute 1 pour toutes les préférences sélectionnés par le seuil
+			for idx2 := 0; idx2 < thresholds[idx1]; idx2++ {
+				count[p[idx1][idx2]] = count[p[idx1][idx2]] + 1
 			}
 		}
 	}
-
-	return count, err
+	return count, nil
 }
 
 func ApprovalSCF(p Profile, thresholds []int) (bestAlts []Alternative, err error) {
-	var count Count
-	count, err = ApprovalSWF(p, thresholds)
+	count, err := ApprovalSWF(p, thresholds)
 	return maxCount(count), err
 }
