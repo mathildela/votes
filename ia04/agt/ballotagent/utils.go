@@ -12,6 +12,7 @@ type Ballot struct {
 	Alts      int
 	Tiebreak  []comsoc.Alternative
 	Prof      comsoc.Profile
+	Options   [][]int
 	A_vote    []string
 }
 
@@ -23,6 +24,7 @@ func (rsa *RestServerAgent) NewBallot(ballot_id string, rule string, deadline st
 	} else {
 		var p comsoc.Profile = make(comsoc.Profile, 0)
 		var a_vote []string = make([]string, 0)
+		var options [][]int = make([][]int, 0)
 		var ballot Ballot
 		ballot = Ballot{
 			Rule:      rule,
@@ -31,6 +33,7 @@ func (rsa *RestServerAgent) NewBallot(ballot_id string, rule string, deadline st
 			Alts:      alts,
 			Tiebreak:  tiebreak,
 			Prof:      p,
+			Options:   options,
 			A_vote:    a_vote,
 		}
 		rsa.ballot_list[ballot_id] = ballot
@@ -96,4 +99,15 @@ func (rsa *RestServerAgent) IdInList(ballot_id string, agent_id string) bool {
 		}
 	}
 	return false
+}
+
+func GetOptionsApproval(options [][]int) []int {
+	var res []int = make([]int, 0)
+	for _, val := range options {
+		res = append(res, val[0])
+	}
+	return res
+}
+func (rsa *RestServerAgent) GetBallot(ballot_id string) Ballot {
+	return rsa.ballot_list[ballot_id]
 }
