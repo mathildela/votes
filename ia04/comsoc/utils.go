@@ -66,7 +66,7 @@ func minCount(count Count) (worseAlts []Alternative) {
 	return worseAlts
 }
 
-func contains(alts []Alternative, alt Alternative) bool {
+func Contains(alts []Alternative, alt Alternative) bool {
 	for _, value := range alts {
 		if value == alt {
 			return true
@@ -85,11 +85,11 @@ func checkProfile(prefs []Alternative, alts []Alternative) error {
 	var verif_alts []Alternative
 	for _, value := range prefs {
 		// check if there are duplicated alternatives
-		if contains(verif_alts, value) {
+		if Contains(verif_alts, value) {
 			return errors.New("Alternative not unique")
 		} else {
 			// check if there is alternative not in alts
-			if !contains(alts, value) {
+			if !Contains(alts, value) {
 				return errors.New("Unexpected alternative")
 			} else {
 				verif_alts = append(verif_alts, value)
@@ -137,7 +137,7 @@ func TieBreakFactory(orderedAlts []Alternative) func([]Alternative) (Alternative
 			} else {
 				// On vérifie que toutes les alternatives de bestAlts sont présentes dans orderedAlts
 				for _, alt := range bestAlts {
-					if !contains(orderedAlts, alt) {
+					if !Contains(orderedAlts, alt) {
 						err := errors.New("At least one alternative missing in orderedAlts")
 						return -1, err
 					}
@@ -146,7 +146,7 @@ func TieBreakFactory(orderedAlts []Alternative) func([]Alternative) (Alternative
 				// On vérifie qu'il n'y a pas de doublons dans bestAlts
 				var verif_alts []Alternative
 				for _, value := range orderedAlts {
-					if contains(verif_alts, value) {
+					if Contains(verif_alts, value) {
 						err := errors.New("Alternative not unique")
 						return -1, err
 					} else {
@@ -155,7 +155,7 @@ func TieBreakFactory(orderedAlts []Alternative) func([]Alternative) (Alternative
 				}
 
 				for _, alt := range orderedAlts {
-					if contains(bestAlts, alt) {
+					if Contains(bestAlts, alt) {
 						return alt, nil
 					}
 				}

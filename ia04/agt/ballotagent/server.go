@@ -25,7 +25,7 @@ type Ballot struct {
 	Deadline  string
 	Voter_ids []string
 	Alts      int
-	Tiebreak  []int
+	Tiebreak  []comsoc.Alternative
 	Prof      comsoc.Profile
 	A_vote    []string
 }
@@ -34,7 +34,7 @@ func NewRestServerAgent(addr string) *RestServerAgent {
 	return &RestServerAgent{id: addr, addr: addr}
 }
 
-func (rsa *RestServerAgent) NewBallot(ballot_id string, rule string, deadline string, alts int, voter_ids []string, tiebreak []int) error {
+func (rsa *RestServerAgent) NewBallot(ballot_id string, rule string, deadline string, alts int, voter_ids []string, tiebreak []comsoc.Alternative) error {
 	// Vérifie si cd ballot existe deja
 	_, ok := rsa.ballot_list[ballot_id]
 	if ok {
@@ -72,18 +72,9 @@ func CheckDeadline(deadline string) bool {
 	return true
 }
 
-func contains(liste []int, i int) bool {
-	for _, value := range liste {
-		if value == i {
-			return true
-		}
-	}
-	return false
-}
-
-func CheckTieBreak(tiebreak []int, alts int) bool {
+func CheckTieBreak(tiebreak []comsoc.Alternative, alts int) bool {
 	for i := 1; i <= alts; i++ {
-		if !contains(tiebreak, i) {
+		if !comsoc.Contains(tiebreak, comsoc.Alternative(i)) {
 			return false
 		}
 	}
@@ -104,17 +95,26 @@ func (rsa *RestServerAgent) CheckBallot(ballot_id string) bool {
 	return ok
 }
 
-func (rsa *RestServerAgent) CheckPref(prefs []int, ballot_id string) error {
+func (rsa *RestServerAgent) CheckPref(prefs []comsoc.Alternative, ballot_id string) error {
 	if len(prefs) == 0 {
 		return errors.New("prefs is empty")
 	} else {
 		for i := 1; i <= rsa.ballot_list[ballot_id].Alts; i++ {
-			if !contains(prefs, i) {
+			if !comsoc.Contains(prefs, comsoc.Alternative(i)) {
 				return errors.New("Missing value(s) in prefs")
 			}
 		}
 	}
 	return nil
+}
+
+func (rsa *RestServerAgent) IdInList(ballot_id string, agent_id string) bool {
+	for _, val := range rsa.ballot_list[ballot_id].Voter_ids {
+		if val == agent_id {
+			return true
+		}
+	}
+	return false
 }
 
 // Test de la méthode
@@ -221,7 +221,6 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 			serial, _ := json.Marshal(resp)
 			w.Write(serial)
 		}
-
 	}
 }
 
@@ -251,7 +250,11 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 		msg := fmt.Sprintf("agent-id is empty")
 		w.Write([]byte(msg))
 		return
-		// Verifier aussi que l'id fait partie des voter_ids
+	} else if !rsa.IdInList(req.Ballot_id, req.Agent_id) {
+		w.WriteHeader(http.StatusBadRequest)
+		msg := fmt.Sprintf("agent-id does not exist")
+		w.Write([]byte(msg))
+		return
 	} else if len(req.Ballot_id) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		msg := fmt.Sprintf("ballot-id is empty")
@@ -274,6 +277,9 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 		return
 		// CheckDeadline aussi pour verifier si la deadline est dépassée
 	} else {
+		var Ballot_copy Ballot = rsa.ballot_list[req.Ballot_id]
+		Ballot_copy.Prof = append(Ballot_copy.Prof, req.Prefs)
+		rsa.ballot_list[req.Ballot_id] = Ballot_copy
 		w.WriteHeader(http.StatusOK)
 		// A COMPLETER
 	}

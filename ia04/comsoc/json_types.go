@@ -1,11 +1,11 @@
 package comsoc
 
 type RequestNewBallot struct {
-	Rule      string   `json:"rule"`
-	Deadline  string   `json:"deadline"`
-	Voter_ids []string `json:"voter-ids"`
-	Alts      int      `json:"#alts"`
-	TieBreak  []int    `json:"tiebreak"`
+	Rule      string        `json:"rule"`
+	Deadline  string        `json:"deadline"`
+	Voter_ids []string      `json:"voter-ids"`
+	Alts      int           `json:"#alts"`
+	TieBreak  []Alternative `json:"tiebreak"`
 }
 
 type ResponseNewBallot struct {
@@ -13,10 +13,10 @@ type ResponseNewBallot struct {
 }
 
 type RequestVote struct {
-	Agent_id  string `json:"agent-id"`
-	Ballot_id string `json:"ballot-id"`
-	Prefs     []int  `json:"prefs"`
-	Options   []int  `json:"options"`
+	Agent_id  string        `json:"agent-id"`
+	Ballot_id string        `json:"ballot-id"`
+	Prefs     []Alternative `json:"prefs"`
+	Options   []int         `json:"options"`
 }
 
 type RequestResult struct {
@@ -24,6 +24,6 @@ type RequestResult struct {
 }
 
 type ResponseResult struct {
-	Winner  int   `json:"winner"`
-	Ranking []int `json:"ranking"`
+	Winner  Alternative `json:"winner"`
+	Ranking []int       `json:"ranking"`
 }

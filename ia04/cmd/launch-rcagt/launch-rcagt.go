@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-
-	"gitlab.utc.fr/lagruesy/ia04/demos/restagentdemo/restclientagent"
 )
 
 func main() {

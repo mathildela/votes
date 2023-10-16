@@ -13,11 +13,11 @@ type RestClientAgent struct {
 	id        string
 	url       string
 	ballot_id string
-	prefs     []int
+	prefs     []comsoc.Alternative
 	options   []int
 }
 
-func NewRestClientAgent(id string, url string, ballot_id string, prefs []int, options []int) *RestClientAgent {
+func NewRestClientAgent(id string, url string, ballot_id string, prefs []comsoc.Alternative, options []int) *RestClientAgent {
 	return &RestClientAgent{id, url, ballot_id, prefs, options}
 }
 
