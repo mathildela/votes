@@ -5,7 +5,7 @@ type RequestNewBallot struct {
 	Deadline  string        `json:"deadline"`
 	Voter_ids []string      `json:"voter-ids"`
 	Alts      int           `json:"#alts"`
-	TieBreak  []Alternative `json:"tiebreak"`
+	TieBreak  []Alternative `json:"tie-break"`
 }
 
 type ResponseNewBallot struct {

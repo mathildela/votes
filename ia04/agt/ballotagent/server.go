@@ -245,17 +245,8 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Verifier que les valeurs sont cohérentes (vérifications plus poussées à l'avenir)
-	if len(req.Agent_id) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		msg := fmt.Sprintf("agent-id is empty")
-		w.Write([]byte(msg))
-		return
-	} else if !rsa.IdInList(req.Ballot_id, req.Agent_id) {
-		w.WriteHeader(http.StatusBadRequest)
-		msg := fmt.Sprintf("agent-id does not exist")
-		w.Write([]byte(msg))
-		return
-	} else if len(req.Ballot_id) == 0 {
+
+	if len(req.Ballot_id) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		msg := fmt.Sprintf("ballot-id is empty")
 		w.Write([]byte(msg))
@@ -263,6 +254,16 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	} else if !rsa.CheckBallot(req.Ballot_id) {
 		w.WriteHeader(http.StatusBadRequest)
 		msg := fmt.Sprintf("ballot-id not found")
+		w.Write([]byte(msg))
+		return
+	} else if len(req.Agent_id) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		msg := fmt.Sprintf("agent-id is empty")
+		w.Write([]byte(msg))
+		return
+	} else if !rsa.IdInList(req.Ballot_id, req.Agent_id) {
+		w.WriteHeader(http.StatusBadRequest)
+		msg := fmt.Sprintf("agent-id does not exist")
 		w.Write([]byte(msg))
 		return
 	} else if rsa.AVote(req.Ballot_id, req.Agent_id) { //NE MARCHE PAS ENCORE
@@ -279,9 +280,10 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	} else {
 		var Ballot_copy Ballot = rsa.ballot_list[req.Ballot_id]
 		Ballot_copy.Prof = append(Ballot_copy.Prof, req.Prefs)
+		Ballot_copy.A_vote = append(Ballot_copy.A_vote, req.Agent_id)
 		rsa.ballot_list[req.Ballot_id] = Ballot_copy
 		w.WriteHeader(http.StatusOK)
-		// A COMPLETER
+		//fmt.Println(rsa.ballot_list[req.Ballot_id].Prof)
 	}
 }
 
@@ -307,20 +309,67 @@ func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 	var resp comsoc.ResponseResult
 
 	// Verifier que les valeurs sont cohérentes (vérifications plus poussées à l'avenir)
-	if len(req.Ballot_id) != 0 {
-		// utiliser les bonnes fonctions ici donc à partir d'un case
-		resp.Winner = 12
-		ranking := []int{1, 2, 3, 4}
-		resp.Ranking = ranking // Pas trop compris ce que c'est
-		w.WriteHeader(http.StatusOK)
-		serial, _ := json.Marshal(resp)
-		w.Write(serial)
-
-	} else {
+	if len(req.Ballot_id) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		msg := fmt.Sprintf("Error")
+		msg := fmt.Sprintf("ballot-id is empty")
 		w.Write([]byte(msg))
 		return
+	} else if !rsa.CheckBallot(req.Ballot_id) {
+		w.WriteHeader(http.StatusBadRequest)
+		msg := fmt.Sprintf("ballot-id not found")
+		w.Write([]byte(msg))
+		return
+	} else {
+		// utiliser les bonnes fonctions ici donc à partir d'un case
+		var ballot Ballot = rsa.ballot_list[req.Ballot_id]
+		switch ballot.Rule {
+		case "majority":
+			fmt.Println("Majority")
+			func_winner := comsoc.SCFFactory(comsoc.MajoritySCF, comsoc.TieBreakFactory(ballot.Tiebreak))
+			winner, err := func_winner(ballot.Prof)
+			if err == nil {
+				resp.Winner = winner
+				w.WriteHeader(http.StatusOK)
+				serial, _ := json.Marshal(resp)
+				w.Write(serial)
+			} else {
+				w.WriteHeader(http.StatusBadRequest)
+				msg := fmt.Sprintf("Error: %s", err)
+				w.Write([]byte(msg))
+				return
+			}
+		case "borda":
+			fmt.Println("Borda")
+			w.WriteHeader(http.StatusOK)
+			serial, _ := json.Marshal(resp)
+			w.Write(serial)
+		case "approval":
+			fmt.Println("Approval")
+			w.WriteHeader(http.StatusOK)
+			serial, _ := json.Marshal(resp)
+			w.Write(serial)
+		case "condorcet":
+			fmt.Println("Condorcet")
+			w.WriteHeader(http.StatusOK)
+			serial, _ := json.Marshal(resp)
+			w.Write(serial)
+		case "copeland":
+			fmt.Println("Copeland")
+			w.WriteHeader(http.StatusOK)
+			serial, _ := json.Marshal(resp)
+			w.Write(serial)
+		case "stv":
+			fmt.Println("STV")
+			w.WriteHeader(http.StatusOK)
+			serial, _ := json.Marshal(resp)
+			w.Write(serial)
+		default:
+			fmt.Println("Unknown Method")
+			w.WriteHeader(http.StatusNotImplemented)
+			msg := fmt.Sprintf("Rule not implemented")
+			w.Write([]byte(msg))
+			return
+		}
 	}
 }
 
