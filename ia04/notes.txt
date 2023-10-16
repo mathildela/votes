@@ -1,0 +1,2 @@
+Tests a faire : 
+check le type des arguments et faire erreurs correspondantes
