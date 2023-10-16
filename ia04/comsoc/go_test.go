@@ -101,41 +101,6 @@ func Test_maxCount(t *testing.T) {
 
 }
 
-func Test_minCount(t *testing.T) {
-	//func minCount(count Count) (worsetAlts []Alternative)
-	//type Count map[Alternative]int
-
-	var count_1 Count = Count{0: 4, 1: 2, 2: 0, 3: 2, 4: 5, 5: 2}
-	tab_1 := [...]Alternative{2}
-	worseAlts_1 := tab_1[:]
-	res_1 := minCount(count_1)
-
-	var count_2 Count = Count{0: 4, 1: 2, 2: 1, 3: 2, 4: 4, 5: 1}
-	tab_21 := [...]Alternative{2, 5}
-	tab_22 := [...]Alternative{5, 2}
-	worseAlts_21 := tab_21[:]
-	worseAlts_22 := tab_22[:]
-	res_2 := minCount(count_2)
-
-	var count_3 Count = Count{}
-	tab_3 := [...]Alternative{}
-	worseAlts_3 := tab_3[:]
-	res_3 := minCount(count_3)
-
-	if !isEqualSliceAlt(res_1, worseAlts_1) {
-		t.Errorf("Output incorrect")
-	}
-
-	if !isEqualSliceAlt(res_2, worseAlts_21) && !isEqualSliceAlt(res_2, worseAlts_22) {
-		t.Errorf("Output incorrect")
-	}
-
-	if !isEqualSliceAlt(res_3, worseAlts_3) {
-		t.Errorf("Output incorrect")
-	}
-
-}
-
 func Test_checkProfile(t *testing.T) {
 	pref1 := []Alternative{1, 2, 3}
 	pref2 := []Alternative{1, 3}
@@ -632,14 +597,14 @@ func TestSWFFactory(t *testing.T) {
 		t.Errorf("no error should be returned, %s computed", err1)
 	}
 
-	if res1[1] != 4 {
-		t.Errorf("error, result for 1 should be 3, %d computed", res1[1])
+	if res1[0] != 1 {
+		t.Errorf("error, the first result should be 1, %d computed", res1[0])
+	}
+	if res1[1] != 2 {
+		t.Errorf("error, the second result should be 2, %d computed", res1[1])
 	}
 	if res1[2] != 3 {
-		t.Errorf("error, result for 2 should be 0, %d computed", res1[2])
-	}
-	if res1[3] != 2 {
-		t.Errorf("error, result for 3 should be 2, %d computed", res1[3])
+		t.Errorf("error, the third result should be 3, %d computed", res1[2])
 	}
 
 	// Test pour Borda
@@ -660,14 +625,14 @@ func TestSWFFactory(t *testing.T) {
 		t.Error(err2)
 	}
 
-	if res2[1] != 5 {
-		t.Errorf("error, result for 1 should be 5, %d computed", res2[1])
+	if res2[0] != 3 {
+		t.Errorf("error, the first result should be 3, %d computed", res2[0])
+	}
+	if res2[1] != 1 {
+		t.Errorf("error, the second result should be 1, %d computed", res2[1])
 	}
 	if res2[2] != 2 {
-		t.Errorf("error, result for 2 should be 0, %d computed", res2[2])
-	}
-	if res2[3] != 6 {
-		t.Errorf("error, result for 3 should be 2, %d computed", res2[3])
+		t.Errorf("error, the third result should be 2, %d computed", res2[2])
 	}
 
 	// La factory n'est pas adaptée au vote par approbation car les inputs de ApprovalSWF
@@ -689,17 +654,17 @@ func TestSWFFactory(t *testing.T) {
 	if err3 != nil {
 		t.Error(err3)
 	}
-	if res3[1] != -1 {
-		t.Errorf("error, result for 1 should be -1, %d computed", res3[1])
+	if res3[0] != 3 {
+		t.Errorf("error, the first result should be 3, %d computed", res3[0])
 	}
-	if res3[2] != 1 {
-		t.Errorf("error, result for 2 should be 1, %d computed", res3[2])
+	if res3[1] != 2 {
+		t.Errorf("error, the second result should be 2, %d computed", res3[1])
 	}
-	if res3[3] != 2 {
-		t.Errorf("error, result for 3 should be 2, %d computed", res3[3])
+	if res3[2] != 4 {
+		t.Errorf("error, the third result should be 4, %d computed", res3[2])
 	}
-	if res3[4] != 0 {
-		t.Errorf("error, result for 4 should be 0, %d computed", res3[4])
+	if res3[3] != 1 {
+		t.Errorf("error, the fourth result should be 1, %d computed", res3[3])
 	}
 
 	// Test pour STV

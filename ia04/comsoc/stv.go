@@ -14,14 +14,14 @@ func STV_SWF(p Profile) (Count, error) {
 		//fmt.Printf("Tour %d\n", tour)
 		//fmt.Printf("profil actuel : %v\n", p_copy)
 		MajorityWithTieBreak := SWFFactory(MajoritySWF, tiebreak)
-		c, err := MajorityWithTieBreak(p_copy)
+		alts, err := MajorityWithTieBreak(p_copy)
 
 		//fmt.Printf("count %v\n", c)
 
 		if err != nil {
 			return nil, err
 		} else {
-			p_copy, err = removeAlt(p_copy, minCount(c)[0])
+			p_copy, err = removeAlt(p_copy, alts[len(alts)-1])
 			if err != nil {
 				return nil, err
 			}

@@ -48,24 +48,6 @@ func maxCount(count Count) (bestAlts []Alternative) {
 	return bestAlts
 }
 
-func minCount(count Count) (worseAlts []Alternative) {
-	var min int = 100000000
-	worseAlts = make([]Alternative, 0)
-	for key, val := range count {
-		if val < min {
-			worseAlts = nil //vider
-			worseAlts = append(worseAlts, key)
-			min = val
-		} else {
-			if val == min {
-				worseAlts = append(worseAlts, key)
-				min = val
-			}
-		}
-	}
-	return worseAlts
-}
-
 func Contains(alts []Alternative, alt Alternative) bool {
 	for _, value := range alts {
 		if value == alt {
@@ -179,11 +161,11 @@ func allDifferentCount(count Count) bool {
 
 // SWF doivent renvoyer un ordre total sans égalité
 // Les SWF doivent renvoyer des counts à la fin (différence avec le sujet)
-func SWFFactory(swf func(p Profile) (Count, error), tiebreak func([]Alternative) (Alternative, error)) func(Profile) (Count, error) {
+func SWFFactory(swf func(p Profile) (Count, error), tiebreak func([]Alternative) (Alternative, error)) func(Profile) ([]Alternative, error) {
 	if swf == nil || tiebreak == nil {
 		return nil
 	} else {
-		return func(p Profile) (Count, error) {
+		return func(p Profile) ([]Alternative, error) {
 			count, err := swf(p)
 			if err != nil {
 				return nil, err
@@ -206,7 +188,12 @@ func SWFFactory(swf func(p Profile) (Count, error), tiebreak func([]Alternative)
 						}
 					}
 				}
-				return count, nil
+				var res []Alternative
+				for len(count) != 0 {
+					res = append(res, maxCount(count)[0])
+					delete(count, maxCount(count)[0])
+				}
+				return res, nil
 			}
 		}
 	}
