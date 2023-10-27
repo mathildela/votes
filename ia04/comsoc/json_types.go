@@ -24,6 +24,6 @@ type RequestResult struct {
 }
 
 type ResponseResult struct {
-	Winner  Alternative `json:"winner"`
-	Ranking []int       `json:"ranking"`
+	Winner  Alternative   `json:"winner"`
+	Ranking []Alternative `json:"ranking"`
 }

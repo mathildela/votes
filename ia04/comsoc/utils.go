@@ -159,6 +159,16 @@ func allDifferentCount(count Count) bool {
 	return true
 }
 
+func sameCount(a Alternative, count Count) []Alternative {
+	s := make([]Alternative, 0)
+	for key, value := range count {
+		if key != a && value == count[a] {
+			s = append(s, key)
+		}
+	}
+	return s
+}
+
 // SWF doivent renvoyer un ordre total sans égalité
 // Les SWF doivent renvoyer des counts à la fin (différence avec le sujet)
 func SWFFactory(swf func(p Profile) (Count, error), tiebreak func([]Alternative) (Alternative, error)) func(Profile) ([]Alternative, error) {
@@ -167,31 +177,34 @@ func SWFFactory(swf func(p Profile) (Count, error), tiebreak func([]Alternative)
 	} else {
 		return func(p Profile) ([]Alternative, error) {
 			count, err := swf(p)
+			res := make([]Alternative, 0)
 			if err != nil {
 				return nil, err
 			} else {
-				for allDifferentCount(count) != true {
-					for key1, value1 := range count {
-						for key2, value2 := range count {
-							if value1 == value2 && key1 != key2 {
-								bestalt, err := tiebreak([]Alternative{key1, key2})
-								if err != nil {
-									return nil, err
-								} else {
-									if bestalt == key1 {
-										count[key1]++
-									} else {
-										count[key2]++
-									}
-								}
+				for len(count) != 0 {
+					//fmt.Println("count og :", count)
+					max := maxCount(count)
+					//fmt.Println("max = ", max)
+					if len(max) == 0 {
+						err = errors.New("Erreur dans la fonction maxCount")
+						return nil, err
+					} else if len(max) == 1 {
+						res = append(res, max[0])
+						delete(count, max[0])
+					} else {
+						sameCount := sameCount(max[0], count)
+						for sameCount != nil {
+							alt, err := tiebreak(sameCount)
+							if err != nil {
+								return nil, err
+							} else {
+								res = append(res, alt)
+								sameCount = removeElement(sameCount, alt)
+								delete(count, alt)
 							}
 						}
 					}
-				}
-				var res []Alternative
-				for len(count) != 0 {
-					res = append(res, maxCount(count)[0])
-					delete(count, maxCount(count)[0])
+					//fmt.Println("res:", res)
 				}
 				return res, nil
 			}

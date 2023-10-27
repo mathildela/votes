@@ -580,12 +580,12 @@ func TestTieBreakFactory(t *testing.T) {
 func TestSWFFactory(t *testing.T) {
 	// Test pour Majority
 	prefs1 := [][]Alternative{
-		{1, 2, 3},
+		{3, 2, 1},
 		{1, 2, 3},
 		{3, 2, 1},
 		{3, 1, 2},
-		{2, 1, 3},
-		{2, 3, 1},
+		{1, 2, 3},
+		{1, 3, 2},
 	}
 	orderedAlts := []Alternative{1, 2, 3}
 	TieBreak := TieBreakFactory(orderedAlts)
@@ -600,10 +600,10 @@ func TestSWFFactory(t *testing.T) {
 	if res1[0] != 1 {
 		t.Errorf("error, the first result should be 1, %d computed", res1[0])
 	}
-	if res1[1] != 2 {
+	if res1[1] != 3 {
 		t.Errorf("error, the second result should be 2, %d computed", res1[1])
 	}
-	if res1[2] != 3 {
+	if res1[2] != 2 {
 		t.Errorf("error, the third result should be 3, %d computed", res1[2])
 	}
 

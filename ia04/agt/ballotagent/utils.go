@@ -3,11 +3,12 @@ package ballotagent
 import (
 	"errors"
 	"ia04/comsoc"
+	"time"
 )
 
 type Ballot struct {
 	Rule      string
-	Deadline  string
+	Deadline  time.Time
 	Voter_ids []string
 	Alts      int
 	Tiebreak  []comsoc.Alternative
@@ -16,7 +17,7 @@ type Ballot struct {
 	A_vote    []string
 }
 
-func (rsa *RestServerAgent) NewBallot(ballot_id string, rule string, deadline string, alts int, voter_ids []string, tiebreak []comsoc.Alternative) error {
+func (rsa *RestServerAgent) NewBallot(ballot_id string, rule string, deadline time.Time, alts int, voter_ids []string, tiebreak []comsoc.Alternative) error {
 	// Vérifie si cd ballot existe deja
 	_, ok := rsa.ballot_list[ballot_id]
 	if ok {
@@ -49,11 +50,6 @@ func CheckImplemented(rule string) bool {
 		}
 	}
 	return false
-}
-
-// A coder : verifie si la deadline est bien ecrite et si elle est bien dans le futur
-func CheckDeadline(deadline string) bool {
-	return true
 }
 
 func CheckTieBreak(tiebreak []comsoc.Alternative, alts int) bool {
@@ -110,4 +106,8 @@ func GetOptionsApproval(options [][]int) []int {
 }
 func (rsa *RestServerAgent) GetBallot(ballot_id string) Ballot {
 	return rsa.ballot_list[ballot_id]
+}
+
+func DeadlineExpired(t time.Time) bool {
+	return time.Now().After(t)
 }

@@ -1,6 +1,9 @@
 package comsoc
 
+import "fmt"
+
 func CopelandSWF(p Profile) (count Count, err error) {
+	fmt.Println("copeland")
 	err = checkProfileAlternative(p, p[0])
 	if err != nil {
 		return nil, err
@@ -31,6 +34,7 @@ func CopelandSWF(p Profile) (count Count, err error) {
 				}
 			}
 		}
+		fmt.Println("count:", count)
 		// on divise les scores par 2 car chaque duo de candidats se sont affrontés 2 fois
 		for key, value := range count {
 			count[key] = value / 2
