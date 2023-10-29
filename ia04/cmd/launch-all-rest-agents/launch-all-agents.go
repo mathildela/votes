@@ -118,7 +118,6 @@ func Vote(url_server string, nomscrutin string, nb_votants int, nb_alts int) (lA
 			go agt.Start()
 		}(agt)
 	}
-	fmt.Scanln()
 	return clAgts
 }
 
@@ -142,7 +141,6 @@ func VoteApproval(url_server string, nomscrutin string, nb_votants int, nb_alts 
 			go agt.Start()
 		}(agt)
 	}
-	fmt.Scanln()
 	return clAgts
 }
 
@@ -171,7 +169,8 @@ func getResult(url_serveur string, nomscrutin string) (map[string]interface{}, e
 	if resp.StatusCode == http.StatusOK {
 		fmt.Println("La requête de résultat a réussi!")
 	} else {
-		fmt.Printf("La requête a échoué avec le code d'état : %d\n", resp.StatusCode)
+		fmt.Printf("La requête a échoué avec le code d'état : %s\n", resp.Status)
+		return nil, errors.New(resp.Status)
 	}
 
 	//Lire reponse pour la création du scrutin
@@ -185,6 +184,18 @@ func main() {
 	const url1 = ":8080"
 	const url2 = "http://localhost:8080"
 	const nb_alts = 5
+	const attente = 3
+
+	var n int
+	fmt.Print("\nEntrez le nombre de votants : ")
+	_, err := fmt.Scanln(&n)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	voters_ids := generateAgentIDs(n)
+	alts := nb_alts
+	tiebreak := []comsoc.Alternative{4, 2, 3, 5, 1}
 
 	servAgt := ballotagent.NewRestServerAgent(url1)
 
@@ -193,23 +204,14 @@ func main() {
 
 	time.Sleep(time.Second)
 
-	var n int
-	fmt.Print("\nEntrez le nombre de voteurs : ")
-	_, err := fmt.Scanln(&n)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-
 	// ************************** MAJORITE **************************
 	// newBallot
 	fmt.Println("\n######## MAJORITY ########")
 
 	rule := "majority"
-	deadline := "2023-11-28T12:34:08+02:00"
-	voters_ids := generateAgentIDs(n)
-	alts := nb_alts
-	tiebreak := []comsoc.Alternative{4, 2, 3, 5, 1}
+
+	deadline_t := time.Now().Add(time.Second * attente)
+	deadline := deadline_t.Format(time.RFC3339)
 
 	nomscrutin, err := AddBallot(url2, rule, deadline, voters_ids, alts, tiebreak)
 	if err != nil {
@@ -218,7 +220,6 @@ func main() {
 	} else {
 		fmt.Printf("> %s créé [méthode %s, %d alts, deadline %s, tie-break %v]\n", nomscrutin, rule, alts, deadline, tiebreak)
 	}
-	fmt.Scanln()
 
 	// Vote
 	clAgts := Vote(url2, nomscrutin, n, nb_alts)
@@ -226,6 +227,9 @@ func main() {
 		fmt.Println("Error")
 		return
 	}
+
+	fmt.Printf("\n -- Attente de %ds pour la fin de la deadline -- \n", attente)
+	time.Sleep(attente * time.Second)
 
 	// Result
 	res, err := getResult(url2, nomscrutin)
@@ -243,10 +247,8 @@ func main() {
 	fmt.Println("\n######## BORDA ########")
 
 	rule = "borda"
-	deadline = "2023-11-28T12:34:08+02:00"
-	voters_ids = generateAgentIDs(n)
-	alts = nb_alts
-	tiebreak = []comsoc.Alternative{4, 2, 3, 5, 1}
+	deadline_t = time.Now().Add(time.Second * attente)
+	deadline = deadline_t.Format(time.RFC3339)
 
 	nomscrutin, err = AddBallot(url2, rule, deadline, voters_ids, alts, tiebreak)
 	if err != nil {
@@ -255,7 +257,6 @@ func main() {
 	} else {
 		fmt.Printf("> %s créé [méthode %s, %d alts, deadline %s, tie-break %v]\n", nomscrutin, rule, alts, deadline, tiebreak)
 	}
-	fmt.Scanln()
 
 	// Vote
 	clAgts = Vote(url2, nomscrutin, n, nb_alts)
@@ -263,6 +264,9 @@ func main() {
 		fmt.Println("Error")
 		return
 	}
+
+	fmt.Printf("\n -- Attente de %ds pour la fin de la deadline -- \n", attente)
+	time.Sleep(attente * time.Second)
 
 	// Result
 	res, err = getResult(url2, nomscrutin)
@@ -280,10 +284,8 @@ func main() {
 	fmt.Println("######## APPROVAL ########")
 
 	rule = "approval"
-	deadline = "2023-11-28T12:34:08+02:00"
-	voters_ids = generateAgentIDs(n)
-	alts = nb_alts
-	tiebreak = []comsoc.Alternative{4, 2, 3, 5, 1}
+	deadline_t = time.Now().Add(time.Second * attente)
+	deadline = deadline_t.Format(time.RFC3339)
 
 	nomscrutin, err = AddBallot(url2, rule, deadline, voters_ids, alts, tiebreak)
 	if err != nil {
@@ -292,7 +294,6 @@ func main() {
 	} else {
 		fmt.Printf("> %s créé [méthode %s, %d alts, deadline %s, tie-break %v]\n", nomscrutin, rule, alts, deadline, tiebreak)
 	}
-	fmt.Scanln()
 
 	// Vote
 	clAgts = VoteApproval(url2, nomscrutin, n, nb_alts)
@@ -301,6 +302,9 @@ func main() {
 		return
 	}
 
+	fmt.Printf("\n -- Attente de %ds pour la fin de la deadline -- \n", attente)
+	time.Sleep(attente * time.Second)
+
 	// Result
 	res, err = getResult(url2, nomscrutin)
 	if err != nil {
@@ -308,7 +312,6 @@ func main() {
 		return
 	} else {
 		fmt.Println("Le gagnant est :", res["winner"])
-		fmt.Println("Pas de classement pour la méthode Approuval")
 	}
 
 	fmt.Scanln()
@@ -317,10 +320,8 @@ func main() {
 	fmt.Println("\n######## CONDORCET ########")
 
 	rule = "condorcet"
-	deadline = "2023-11-28T12:34:08+02:00"
-	voters_ids = generateAgentIDs(n)
-	alts = nb_alts
-	tiebreak = []comsoc.Alternative{4, 2, 3, 5, 1}
+	deadline_t = time.Now().Add(time.Second * attente)
+	deadline = deadline_t.Format(time.RFC3339)
 
 	nomscrutin, err = AddBallot(url2, rule, deadline, voters_ids, alts, tiebreak)
 	if err != nil {
@@ -329,7 +330,6 @@ func main() {
 	} else {
 		fmt.Printf("> %s créé [méthode %s, %d alts, deadline %s, tie-break %v]\n", nomscrutin, rule, alts, deadline, tiebreak)
 	}
-	fmt.Scanln()
 
 	// Vote
 	clAgts = Vote(url2, nomscrutin, n, nb_alts)
@@ -337,6 +337,9 @@ func main() {
 		fmt.Println("Error")
 		return
 	}
+
+	fmt.Printf("\n -- Attente de %ds pour la fin de la deadline -- \n", attente)
+	time.Sleep(attente * time.Second)
 
 	// Result
 	res, err = getResult(url2, nomscrutin)
@@ -348,7 +351,6 @@ func main() {
 			fmt.Println("Pas de vainqueur de Condorcet.")
 		} else {
 			fmt.Println("Le gagnant est :", res["winner"])
-			fmt.Println("Le classement est :", res["ranking"])
 		}
 
 	}
@@ -359,10 +361,8 @@ func main() {
 	fmt.Println("\n######## COPELAND ########")
 
 	rule = "copeland"
-	deadline = "2023-11-28T12:34:08+02:00"
-	voters_ids = generateAgentIDs(n)
-	alts = nb_alts
-	tiebreak = []comsoc.Alternative{4, 2, 3, 5, 1}
+	deadline_t = time.Now().Add(time.Second * attente)
+	deadline = deadline_t.Format(time.RFC3339)
 
 	nomscrutin, err = AddBallot(url2, rule, deadline, voters_ids, alts, tiebreak)
 	if err != nil {
@@ -371,7 +371,6 @@ func main() {
 	} else {
 		fmt.Printf("> %s créé [méthode %s, %d alts, deadline %s, tie-break %v]\n", nomscrutin, rule, alts, deadline, tiebreak)
 	}
-	fmt.Scanln()
 
 	// Vote
 	clAgts = Vote(url2, nomscrutin, n, nb_alts)
@@ -379,6 +378,9 @@ func main() {
 		fmt.Println("Error")
 		return
 	}
+
+	fmt.Printf("\n -- Attente de %ds pour la fin de la deadline -- \n", attente)
+	time.Sleep(attente * time.Second)
 
 	// Result
 	res, err = getResult(url2, nomscrutin)
@@ -396,10 +398,8 @@ func main() {
 	fmt.Println("######## STV ########")
 
 	rule = "stv"
-	deadline = "2023-11-28T12:34:08+02:00"
-	voters_ids = generateAgentIDs(n)
-	alts = nb_alts
-	tiebreak = []comsoc.Alternative{4, 2, 3, 5, 1}
+	deadline_t = time.Now().Add(time.Second * attente)
+	deadline = deadline_t.Format(time.RFC3339)
 
 	nomscrutin, err = AddBallot(url2, rule, deadline, voters_ids, alts, tiebreak)
 	if err != nil {
@@ -408,7 +408,6 @@ func main() {
 	} else {
 		fmt.Printf("> %s créé [méthode %s, %d alts, deadline %s, tie-break %v]\n", nomscrutin, rule, alts, deadline, tiebreak)
 	}
-	fmt.Scanln()
 
 	// Vote
 	clAgts = Vote(url2, nomscrutin, n, nb_alts)
@@ -416,6 +415,9 @@ func main() {
 		fmt.Println("Error")
 		return
 	}
+
+	fmt.Printf("\n -- Attente de %ds pour la fin de la deadline -- \n", attente)
+	time.Sleep(attente * time.Second)
 
 	// Result
 	res, err = getResult(url2, nomscrutin)
