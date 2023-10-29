@@ -1,6 +1,7 @@
 package comsoc
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -578,8 +579,8 @@ func TestTieBreakFactory(t *testing.T) {
 // ---------------------------------------------
 
 func TestSWFFactory(t *testing.T) {
-	// Test pour Majority
-	prefs1 := [][]Alternative{
+	//Test pour Majority
+	prefs0 := [][]Alternative{
 		{3, 2, 1},
 		{1, 2, 3},
 		{3, 2, 1},
@@ -592,19 +593,51 @@ func TestSWFFactory(t *testing.T) {
 
 	SWFMajority := SWFFactory(MajoritySWF, TieBreak)
 
+	res0, err0 := SWFMajority(prefs0)
+	if err0 != nil {
+		t.Errorf("no error should be returned, %s computed", err0)
+	}
+
+	if res0[0] != 1 {
+		t.Errorf("error, the first result should be 1, %d computed", res0[0])
+	}
+	if res0[1] != 3 {
+		t.Errorf("error, the second result should be 2, %d computed", res0[1])
+	}
+	if res0[2] != 2 {
+		t.Errorf("error, the third result should be 3, %d computed", res0[2])
+	}
+
+	prefs1 := [][]Alternative{
+		{4, 1, 5, 2, 3},
+		{5, 3, 4, 1, 2},
+		{1, 2, 5, 4, 3},
+	}
+	orderedAlts = []Alternative{4, 2, 3, 5, 1}
+	TieBreak = TieBreakFactory(orderedAlts)
+
+	SWFMajority = SWFFactory(MajoritySWF, TieBreak)
+
 	res1, err1 := SWFMajority(prefs1)
+	fmt.Println(res1)
 	if err1 != nil {
 		t.Errorf("no error should be returned, %s computed", err1)
 	}
 
-	if res1[0] != 1 {
-		t.Errorf("error, the first result should be 1, %d computed", res1[0])
+	if res1[0] != 4 {
+		t.Errorf("error, the first result should be 4, %d computed", res1[0])
 	}
-	if res1[1] != 3 {
-		t.Errorf("error, the second result should be 2, %d computed", res1[1])
+	if res1[1] != 5 {
+		t.Errorf("error, the second result should be 5, %d computed", res1[1])
 	}
-	if res1[2] != 2 {
-		t.Errorf("error, the third result should be 3, %d computed", res1[2])
+	if res1[2] != 1 {
+		t.Errorf("error, the third result should be 1, %d computed", res1[2])
+	}
+	if res1[3] != 2 {
+		t.Errorf("error, the third result should be 2, %d computed", res1[3])
+	}
+	if res1[4] != 3 {
+		t.Errorf("error, the third result should be 3, %d computed", res1[4])
 	}
 
 	// Test pour Borda
@@ -626,13 +659,13 @@ func TestSWFFactory(t *testing.T) {
 	}
 
 	if res2[0] != 3 {
-		t.Errorf("error, the first result should be 3, %d computed", res2[0])
+		t.Errorf("error borda, the first result should be 3, %d computed", res2[0])
 	}
 	if res2[1] != 1 {
-		t.Errorf("error, the second result should be 1, %d computed", res2[1])
+		t.Errorf("error borda, the second result should be 1, %d computed", res2[1])
 	}
 	if res2[2] != 2 {
-		t.Errorf("error, the third result should be 2, %d computed", res2[2])
+		t.Errorf("error borda, the third result should be 2, %d computed", res2[2])
 	}
 
 	// La factory n'est pas adaptée au vote par approbation car les inputs de ApprovalSWF

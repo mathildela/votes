@@ -31,7 +31,7 @@ func isPref(alt1, alt2 Alternative, prefs []Alternative) bool {
 // renvoie les meilleures alternatives pour un décompte donné
 // Vérifier avec plusieurs tests
 func maxCount(count Count) (bestAlts []Alternative) {
-	var max int = -1
+	var max int = -100000
 	bestAlts = make([]Alternative, 0)
 	for key, val := range count {
 		if val > max {
@@ -162,7 +162,7 @@ func allDifferentCount(count Count) bool {
 func sameCount(a Alternative, count Count) []Alternative {
 	s := make([]Alternative, 0)
 	for key, value := range count {
-		if key != a && value == count[a] {
+		if value == count[a] {
 			s = append(s, key)
 		}
 	}
