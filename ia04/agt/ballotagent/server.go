@@ -72,6 +72,7 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 		fmt.Fprint(w, err.Error())
 		return
 	}
+
 	// traitement de la requête
 	var resp comsoc.ResponseNewBallot
 
@@ -169,6 +170,7 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, err.Error())
 		return
 	}
+
 	// Verifier que les valeurs sont cohérentes (vérifications plus poussées à l'avenir)
 
 	if len(req.Ballot_id) == 0 {
