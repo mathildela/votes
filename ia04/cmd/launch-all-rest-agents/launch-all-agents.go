@@ -8,6 +8,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"time"
 
 	"ia04/agt/ballotagent"
 	"ia04/agt/voteragent"
@@ -27,32 +28,30 @@ type DataResult struct {
 }
 
 func generatePrefs(nb_max int) []comsoc.Alternative {
-	// Vérifier si nb_max est inférieur à 1
 	if nb_max < 1 {
 		return nil
 	}
-
-	// Créer une carte pour suivre les nombres déjà générés
 	generatedNumbers := make(map[comsoc.Alternative]struct{})
-
-	// Créer une slice pour stocker les nombres uniques générés
 	uniqueNumbers := []comsoc.Alternative{}
-
-	// Générer des nombres uniques aléatoires jusqu'à ce que la taille soit égale à nb_max
 	for len(uniqueNumbers) < nb_max {
-		// Générer un nombre aléatoire entre 1 et nb_max
 		num := comsoc.Alternative(rand.Intn(nb_max) + 1)
-
-		// Vérifier si le nombre a déjà été généré
 		if _, exists := generatedNumbers[num]; !exists {
-			// Ajouter le nombre unique à la liste
 			uniqueNumbers = append(uniqueNumbers, num)
-			// Marquer le nombre comme généré
 			generatedNumbers[num] = struct{}{}
 		}
 	}
-
 	return uniqueNumbers
+}
+
+func generateAgentIDs(n int) []string {
+	if n <= 0 {
+		return nil
+	}
+	agentIDs := make([]string, n)
+	for i := 1; i <= n; i++ {
+		agentIDs[i-1] = fmt.Sprintf("ag_id%02d", i)
+	}
+	return agentIDs
 }
 
 func AddBallot(url_server string, rule string, deadline string, voter_ids []string, alts int, tiebreak []comsoc.Alternative) (string, error) {
@@ -84,9 +83,9 @@ func AddBallot(url_server string, rule string, deadline string, voter_ids []stri
 		log.Fatal(err)
 	}
 	if resp.StatusCode == http.StatusOK {
-		fmt.Println("La requête a réussi!")
+		fmt.Println("La requête de création de ballot a réussi!")
 	} else {
-		fmt.Printf("La requête a échoué avec le code d'état : %d\n", resp.StatusCode)
+		fmt.Printf("La requête de création de ballot a échoué avec le code d'état : %d\n", resp.StatusCode)
 		msg := fmt.Sprintf("Error: %d", resp.StatusCode)
 		err := errors.New(msg)
 		return "", err
@@ -103,11 +102,10 @@ func AddBallot(url_server string, rule string, deadline string, voter_ids []stri
 func Vote(url_server string, nomscrutin string, nb_votants int, nb_alts int) (lAgts []voteragent.RestClientAgent) {
 	clAgts := make([]voteragent.RestClientAgent, 0, nb_votants)
 
-	log.Println("démarrage des clients voters...")
+	log.Println("Démarrage des clients voters...")
 	for i := 1; i <= nb_votants; i++ {
 		id := fmt.Sprintf("ag_id%02d", i)
 		prefs := generatePrefs(nb_alts)
-		//fmt.Println(prefs)
 		options := make([]int, 0)
 		agt := voteragent.NewRestClientAgent(id, url_server, nomscrutin, prefs, options)
 		clAgts = append(clAgts, *agt) //Fais un slice d'agents
@@ -127,11 +125,10 @@ func Vote(url_server string, nomscrutin string, nb_votants int, nb_alts int) (lA
 func VoteApproval(url_server string, nomscrutin string, nb_votants int, nb_alts int) (lAgts []voteragent.RestClientAgent) {
 	clAgts := make([]voteragent.RestClientAgent, 0, nb_votants)
 
-	log.Println("démarrage des clients voters...")
+	log.Println("Démarrage des clients voters...")
 	for i := 1; i <= nb_votants; i++ {
 		id := fmt.Sprintf("ag_id%02d", i)
 		prefs := generatePrefs(nb_alts)
-		//fmt.Println(prefs)
 		options := make([]int, 0)
 		options = append(options, rand.Intn(nb_alts)+1)
 		agt := voteragent.NewRestClientAgent(id, url_server, nomscrutin, prefs, options)
@@ -153,7 +150,6 @@ func getResult(url_serveur string, nomscrutin string) (map[string]interface{}, e
 	data := DataResult{
 		Ballot_id: nomscrutin,
 	}
-
 	// Convertir la structure en JSON
 	jsonData, err := json.Marshal(data)
 	if err != nil {
@@ -173,7 +169,7 @@ func getResult(url_serveur string, nomscrutin string) (map[string]interface{}, e
 		log.Fatal(err)
 	}
 	if resp.StatusCode == http.StatusOK {
-		fmt.Println("La requête a réussi!")
+		fmt.Println("La requête de résultat a réussi!")
 	} else {
 		fmt.Printf("La requête a échoué avec le code d'état : %d\n", resp.StatusCode)
 	}
@@ -182,29 +178,36 @@ func getResult(url_serveur string, nomscrutin string) (map[string]interface{}, e
 	defer resp.Body.Close()
 	var res map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&res)
-	fmt.Println(res)
-	fmt.Scanln()
 	return res, nil
 }
 
 func main() {
-	const n = 3
 	const url1 = ":8080"
 	const url2 = "http://localhost:8080"
 	const nb_alts = 5
 
 	servAgt := ballotagent.NewRestServerAgent(url1)
 
-	log.Println("démarrage du serveur...")
+	log.Println("Démarrage du serveur...")
 	go servAgt.Start()
+
+	time.Sleep(time.Second)
+
+	var n int
+	fmt.Print("\nEntrez le nombre de voteurs : ")
+	_, err := fmt.Scanln(&n)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
 
 	// ************************** MAJORITE **************************
 	// newBallot
-	fmt.Println("######## MAJORITY ########")
+	fmt.Println("\n######## MAJORITY ########")
 
 	rule := "majority"
-	deadline := "2023-10-28T12:34:08+02:00"
-	voters_ids := []string{"ag_id01", "ag_id02", "ag_id03"}
+	deadline := "2023-11-28T12:34:08+02:00"
+	voters_ids := generateAgentIDs(n)
 	alts := nb_alts
 	tiebreak := []comsoc.Alternative{4, 2, 3, 5, 1}
 
@@ -213,12 +216,12 @@ func main() {
 		fmt.Println("Error: ", err)
 		return
 	} else {
-		fmt.Println(nomscrutin)
+		fmt.Printf("> %s créé [méthode %s, %d alts, deadline %s, tie-break %v]\n", nomscrutin, rule, alts, deadline, tiebreak)
 	}
 	fmt.Scanln()
 
 	// Vote
-	clAgts := Vote(url2, nomscrutin, 3, nb_alts)
+	clAgts := Vote(url2, nomscrutin, n, nb_alts)
 	if clAgts == nil {
 		fmt.Println("Error")
 		return
@@ -230,16 +233,18 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	} else {
-		fmt.Println("The winner is :", res["winner"])
-		fmt.Println("The ranking is :", res["ranking"])
+		fmt.Println("Le gagnant est :", res["winner"])
+		fmt.Println("Le classement est :", res["ranking"])
 	}
 
+	fmt.Scanln()
+
 	// ************************** BORDA **************************
-	fmt.Println("######## BORDA ########")
+	fmt.Println("\n######## BORDA ########")
 
 	rule = "borda"
-	deadline = "2023-10-28T12:34:08+02:00"
-	voters_ids = []string{"ag_id01", "ag_id02", "ag_id03"}
+	deadline = "2023-11-28T12:34:08+02:00"
+	voters_ids = generateAgentIDs(n)
 	alts = nb_alts
 	tiebreak = []comsoc.Alternative{4, 2, 3, 5, 1}
 
@@ -248,12 +253,12 @@ func main() {
 		fmt.Println("Error: ", err)
 		return
 	} else {
-		fmt.Println(nomscrutin)
+		fmt.Printf("> %s créé [méthode %s, %d alts, deadline %s, tie-break %v]\n", nomscrutin, rule, alts, deadline, tiebreak)
 	}
 	fmt.Scanln()
 
 	// Vote
-	clAgts = Vote(url2, nomscrutin, 3, nb_alts)
+	clAgts = Vote(url2, nomscrutin, n, nb_alts)
 	if clAgts == nil {
 		fmt.Println("Error")
 		return
@@ -265,16 +270,18 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	} else {
-		fmt.Println("The winner is :", res["winner"])
-		fmt.Println("The ranking is :", res["ranking"])
+		fmt.Println("Le gagnant est :", res["winner"])
+		fmt.Println("Le classement est :", res["ranking"])
 	}
+
+	fmt.Scanln()
 
 	// ************************** APPROVAL **************************
 	fmt.Println("######## APPROVAL ########")
 
 	rule = "approval"
-	deadline = "2023-10-28T12:34:08+02:00"
-	voters_ids = []string{"ag_id01", "ag_id02", "ag_id03"}
+	deadline = "2023-11-28T12:34:08+02:00"
+	voters_ids = generateAgentIDs(n)
 	alts = nb_alts
 	tiebreak = []comsoc.Alternative{4, 2, 3, 5, 1}
 
@@ -283,12 +290,12 @@ func main() {
 		fmt.Println("Error: ", err)
 		return
 	} else {
-		fmt.Println(nomscrutin)
+		fmt.Printf("> %s créé [méthode %s, %d alts, deadline %s, tie-break %v]\n", nomscrutin, rule, alts, deadline, tiebreak)
 	}
 	fmt.Scanln()
 
 	// Vote
-	clAgts = VoteApproval(url2, nomscrutin, 3, nb_alts)
+	clAgts = VoteApproval(url2, nomscrutin, n, nb_alts)
 	if clAgts == nil {
 		fmt.Println("Error")
 		return
@@ -300,16 +307,18 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	} else {
-		fmt.Println("The winner is :", res["winner"])
-		fmt.Println("The ranking is :", res["ranking"])
+		fmt.Println("Le gagnant est :", res["winner"])
+		fmt.Println("Pas de classement pour la méthode Approuval")
 	}
+
+	fmt.Scanln()
 
 	// ************************** CONDORCET **************************
-	fmt.Println("######## CONDORCET ########")
+	fmt.Println("\n######## CONDORCET ########")
 
 	rule = "condorcet"
-	deadline = "2023-10-28T12:34:08+02:00"
-	voters_ids = []string{"ag_id01", "ag_id02", "ag_id03"}
+	deadline = "2023-11-28T12:34:08+02:00"
+	voters_ids = generateAgentIDs(n)
 	alts = nb_alts
 	tiebreak = []comsoc.Alternative{4, 2, 3, 5, 1}
 
@@ -318,12 +327,12 @@ func main() {
 		fmt.Println("Error: ", err)
 		return
 	} else {
-		fmt.Println(nomscrutin)
+		fmt.Printf("> %s créé [méthode %s, %d alts, deadline %s, tie-break %v]\n", nomscrutin, rule, alts, deadline, tiebreak)
 	}
 	fmt.Scanln()
 
 	// Vote
-	clAgts = Vote(url2, nomscrutin, 3, nb_alts)
+	clAgts = Vote(url2, nomscrutin, n, nb_alts)
 	if clAgts == nil {
 		fmt.Println("Error")
 		return
@@ -335,16 +344,23 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	} else {
-		fmt.Println("The winner is :", res["winner"])
-		fmt.Println("The ranking is :", res["ranking"])
+		if res["winner"] == nil {
+			fmt.Println("Pas de vainqueur de Condorcet.")
+		} else {
+			fmt.Println("Le gagnant est :", res["winner"])
+			fmt.Println("Le classement est :", res["ranking"])
+		}
+
 	}
+
+	fmt.Scanln()
 
 	// ************************** COPELAND **************************
-	fmt.Println("######## COPELAND ########")
+	fmt.Println("\n######## COPELAND ########")
 
 	rule = "copeland"
-	deadline = "2023-10-28T12:34:08+02:00"
-	voters_ids = []string{"ag_id01", "ag_id02", "ag_id03"}
+	deadline = "2023-11-28T12:34:08+02:00"
+	voters_ids = generateAgentIDs(n)
 	alts = nb_alts
 	tiebreak = []comsoc.Alternative{4, 2, 3, 5, 1}
 
@@ -353,12 +369,12 @@ func main() {
 		fmt.Println("Error: ", err)
 		return
 	} else {
-		fmt.Println(nomscrutin)
+		fmt.Printf("> %s créé [méthode %s, %d alts, deadline %s, tie-break %v]\n", nomscrutin, rule, alts, deadline, tiebreak)
 	}
 	fmt.Scanln()
 
 	// Vote
-	clAgts = Vote(url2, nomscrutin, 3, nb_alts)
+	clAgts = Vote(url2, nomscrutin, n, nb_alts)
 	if clAgts == nil {
 		fmt.Println("Error")
 		return
@@ -370,16 +386,18 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	} else {
-		fmt.Println("The winner is :", res["winner"])
-		fmt.Println("The ranking is :", res["ranking"])
+		fmt.Println("Le gagnant est :", res["winner"])
+		fmt.Println("Le classement est :", res["ranking"])
 	}
+
+	fmt.Scanln()
 
 	// ************************** STV **************************
 	fmt.Println("######## STV ########")
 
 	rule = "stv"
-	deadline = "2023-10-28T12:34:08+02:00"
-	voters_ids = []string{"ag_id01", "ag_id02", "ag_id03"}
+	deadline = "2023-11-28T12:34:08+02:00"
+	voters_ids = generateAgentIDs(n)
 	alts = nb_alts
 	tiebreak = []comsoc.Alternative{4, 2, 3, 5, 1}
 
@@ -388,12 +406,12 @@ func main() {
 		fmt.Println("Error: ", err)
 		return
 	} else {
-		fmt.Println(nomscrutin)
+		fmt.Printf("> %s créé [méthode %s, %d alts, deadline %s, tie-break %v]\n", nomscrutin, rule, alts, deadline, tiebreak)
 	}
 	fmt.Scanln()
 
 	// Vote
-	clAgts = Vote(url2, nomscrutin, 3, nb_alts)
+	clAgts = Vote(url2, nomscrutin, n, nb_alts)
 	if clAgts == nil {
 		fmt.Println("Error")
 		return
@@ -405,8 +423,8 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	} else {
-		fmt.Println("The winner is :", res["winner"])
-		fmt.Println("The ranking is :", res["ranking"])
+		fmt.Println("Le gagnant est :", res["winner"])
+		fmt.Println("Le classement est :", res["ranking"])
 	}
 
 }
