@@ -239,160 +239,173 @@ func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 
 	// Verifier que les valeurs sont cohérentes (vérifications plus poussées à l'avenir)
 	if len(req.Ballot_id) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusNotFound)
 		msg := fmt.Sprintf("ballot-id is empty")
 		w.Write([]byte(msg))
 		return
 	} else if !rsa.CheckBallot(req.Ballot_id) {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusNotFound)
 		msg := fmt.Sprintf("ballot-id not found")
+		w.Write([]byte(msg))
+		return
+	} else if EarlierThanDeadline(rsa.ballot_list[req.Ballot_id].Deadline) {
+		w.WriteHeader(http.StatusTooEarly)
+		msg := fmt.Sprintf("Deadline is not over")
 		w.Write([]byte(msg))
 		return
 	} else {
 		// utiliser les bonnes fonctions ici donc à partir d'un case
 		var ballot Ballot = rsa.ballot_list[req.Ballot_id]
-		switch ballot.Rule {
-		case "majority":
-			fmt.Println("Majority")
-			func_winner := comsoc.SCFFactory(comsoc.MajoritySCF, comsoc.TieBreakFactory(ballot.Tiebreak))
-			winner, err1 := func_winner(ballot.Prof)
-			func_ranking := comsoc.SWFFactory(comsoc.MajoritySWF, comsoc.TieBreakFactory(ballot.Tiebreak))
-			ranking, err2 := func_ranking(ballot.Prof)
-			if err1 == nil && err2 == nil {
-				resp.Winner = winner
-				resp.Ranking = ranking
-				w.WriteHeader(http.StatusOK)
-				serial, _ := json.Marshal(resp)
-				w.Write(serial)
-			} else {
-				if err1 != nil {
-					w.WriteHeader(http.StatusBadRequest)
-					msg := fmt.Sprintf("Error: %s", err1)
-					w.Write([]byte(msg))
-				}
-				if err2 != nil {
-					w.WriteHeader(http.StatusBadRequest)
-					msg := fmt.Sprintf("Error: %s", err2)
-					w.Write([]byte(msg))
-					return
-				}
-			}
-		case "borda":
-			fmt.Println("Borda")
-			func_winner := comsoc.SCFFactory(comsoc.BordaSCF, comsoc.TieBreakFactory(ballot.Tiebreak))
-			winner, err1 := func_winner(ballot.Prof)
-			func_ranking := comsoc.SWFFactory(comsoc.BordaSWF, comsoc.TieBreakFactory(ballot.Tiebreak))
-			ranking, err2 := func_ranking(ballot.Prof)
-			if err1 == nil && err2 == nil {
-				resp.Winner = winner
-				resp.Ranking = ranking
-				w.WriteHeader(http.StatusOK)
-				serial, _ := json.Marshal(resp)
-				w.Write(serial)
-			} else {
-				if err1 != nil {
-					w.WriteHeader(http.StatusBadRequest)
-					msg := fmt.Sprintf("Error: %s", err1)
-					w.Write([]byte(msg))
-				}
-				if err2 != nil {
-					w.WriteHeader(http.StatusBadRequest)
-					msg := fmt.Sprintf("Error: %s", err2)
-					w.Write([]byte(msg))
-					return
-				}
-			}
-		case "approval":
-			// Besoin des options + pas de gestion de tiebreak dans la fonction
-			// Verifier que les options sont cohérentes
-			winner, err := comsoc.ApprovalSCF(ballot.Prof, GetOptionsApproval(ballot.Options))
-			if err == nil {
-				resp.Winner = winner[0]
-				resp.Ranking = nil
-				w.WriteHeader(http.StatusOK)
-				serial, _ := json.Marshal(resp)
-				w.Write(serial)
-			} else {
-				w.WriteHeader(http.StatusBadRequest)
-				msg := fmt.Sprintf("Error: %s", err)
-				w.Write([]byte(msg))
-				return
-			}
-		case "condorcet":
-			fmt.Println("Condorcet")
-			winner, err := comsoc.CondorcetWinner(ballot.Prof)
-			if err == nil {
-				if winner != nil {
-					// Cas où on trouve un gagnant de Condorcet
-					resp.Winner = winner[0]
+		// Cas où personne n'a voté
+		if len(ballot.Prof) == 0 {
+			w.WriteHeader(http.StatusOK)
+			serial, _ := json.Marshal(resp)
+			w.Write(serial)
+		} else {
+			// Cas où au moins une personne a voté
+			switch ballot.Rule {
+			case "majority":
+				fmt.Println("Majority")
+				func_winner := comsoc.SCFFactory(comsoc.MajoritySCF, comsoc.TieBreakFactory(ballot.Tiebreak))
+				winner, err1 := func_winner(ballot.Prof)
+				func_ranking := comsoc.SWFFactory(comsoc.MajoritySWF, comsoc.TieBreakFactory(ballot.Tiebreak))
+				ranking, err2 := func_ranking(ballot.Prof)
+				if err1 == nil && err2 == nil {
+					resp.Winner = winner
+					resp.Ranking = ranking
 					w.WriteHeader(http.StatusOK)
 					serial, _ := json.Marshal(resp)
 					w.Write(serial)
+				} else {
+					if err1 != nil {
+						w.WriteHeader(http.StatusBadRequest)
+						msg := fmt.Sprintf("Error: %s", err1)
+						w.Write([]byte(msg))
+					}
+					if err2 != nil {
+						w.WriteHeader(http.StatusBadRequest)
+						msg := fmt.Sprintf("Error: %s", err2)
+						w.Write([]byte(msg))
+						return
+					}
 				}
-				// Sinon on ne renvoie rien
-			} else {
-				w.WriteHeader(http.StatusBadRequest)
-				msg := fmt.Sprintf("Error: %s", err)
+			case "borda":
+				fmt.Println("Borda")
+				func_winner := comsoc.SCFFactory(comsoc.BordaSCF, comsoc.TieBreakFactory(ballot.Tiebreak))
+				winner, err1 := func_winner(ballot.Prof)
+				func_ranking := comsoc.SWFFactory(comsoc.BordaSWF, comsoc.TieBreakFactory(ballot.Tiebreak))
+				ranking, err2 := func_ranking(ballot.Prof)
+				if err1 == nil && err2 == nil {
+					resp.Winner = winner
+					resp.Ranking = ranking
+					w.WriteHeader(http.StatusOK)
+					serial, _ := json.Marshal(resp)
+					w.Write(serial)
+				} else {
+					if err1 != nil {
+						w.WriteHeader(http.StatusBadRequest)
+						msg := fmt.Sprintf("Error: %s", err1)
+						w.Write([]byte(msg))
+					}
+					if err2 != nil {
+						w.WriteHeader(http.StatusBadRequest)
+						msg := fmt.Sprintf("Error: %s", err2)
+						w.Write([]byte(msg))
+						return
+					}
+				}
+			case "approval":
+				// Besoin des options + pas de gestion de tiebreak dans la fonction
+				// Verifier que les options sont cohérentes
+				winner, err := comsoc.ApprovalSCF(ballot.Prof, GetOptionsApproval(ballot.Options))
+				if err == nil {
+					resp.Winner = winner[0]
+					resp.Ranking = nil
+					w.WriteHeader(http.StatusOK)
+					serial, _ := json.Marshal(resp)
+					w.Write(serial)
+				} else {
+					w.WriteHeader(http.StatusBadRequest)
+					msg := fmt.Sprintf("Error: %s", err)
+					w.Write([]byte(msg))
+					return
+				}
+			case "condorcet":
+				fmt.Println("Condorcet")
+				winner, err := comsoc.CondorcetWinner(ballot.Prof)
+				if err == nil {
+					if winner != nil {
+						// Cas où on trouve un gagnant de Condorcet
+						resp.Winner = winner[0]
+						w.WriteHeader(http.StatusOK)
+						serial, _ := json.Marshal(resp)
+						w.Write(serial)
+					}
+					// Sinon on ne renvoie rien
+				} else {
+					w.WriteHeader(http.StatusBadRequest)
+					msg := fmt.Sprintf("Error: %s", err)
+					w.Write([]byte(msg))
+					return
+				}
+			case "copeland":
+				fmt.Println("Copeland")
+				func_winner := comsoc.SCFFactory(comsoc.CopelandSCF, comsoc.TieBreakFactory(ballot.Tiebreak))
+				winner, err1 := func_winner(ballot.Prof)
+				func_ranking := comsoc.SWFFactory(comsoc.CopelandSWF, comsoc.TieBreakFactory(ballot.Tiebreak))
+				ranking, err2 := func_ranking(ballot.Prof)
+				if err1 == nil && err2 == nil {
+					resp.Winner = winner
+					resp.Ranking = ranking
+					w.WriteHeader(http.StatusOK)
+					serial, _ := json.Marshal(resp)
+					w.Write(serial)
+				} else {
+					if err1 != nil {
+						fmt.Println("erreur 1")
+						w.WriteHeader(http.StatusBadRequest)
+						msg := fmt.Sprintf("Error: %s", err1)
+						w.Write([]byte(msg))
+					}
+					if err2 != nil {
+						fmt.Println("erreur 1")
+						w.WriteHeader(http.StatusBadRequest)
+						msg := fmt.Sprintf("Error: %s", err2)
+						w.Write([]byte(msg))
+						return
+					}
+				}
+			case "stv":
+				fmt.Println("STV")
+				winner, err1 := comsoc.STV_SCF(ballot.Prof)
+				func_ranking := comsoc.SWFFactory(comsoc.STV_SWF, comsoc.TieBreakFactory(ballot.Tiebreak))
+				ranking, err2 := func_ranking(ballot.Prof)
+				if err1 == nil && err2 == nil {
+					resp.Winner = winner[0]
+					resp.Ranking = ranking
+					w.WriteHeader(http.StatusOK)
+					serial, _ := json.Marshal(resp)
+					w.Write(serial)
+				} else {
+					if err1 != nil {
+						w.WriteHeader(http.StatusBadRequest)
+						msg := fmt.Sprintf("Error: %s", err1)
+						w.Write([]byte(msg))
+					}
+					if err2 != nil {
+						w.WriteHeader(http.StatusBadRequest)
+						msg := fmt.Sprintf("Error: %s", err2)
+						w.Write([]byte(msg))
+						return
+					}
+				}
+			default:
+				fmt.Println("Unknown Method")
+				w.WriteHeader(http.StatusNotImplemented)
+				msg := fmt.Sprintf("Rule not implemented")
 				w.Write([]byte(msg))
 				return
 			}
-		case "copeland":
-			fmt.Println("Copeland")
-			func_winner := comsoc.SCFFactory(comsoc.CopelandSCF, comsoc.TieBreakFactory(ballot.Tiebreak))
-			winner, err1 := func_winner(ballot.Prof)
-			func_ranking := comsoc.SWFFactory(comsoc.CopelandSWF, comsoc.TieBreakFactory(ballot.Tiebreak))
-			ranking, err2 := func_ranking(ballot.Prof)
-			if err1 == nil && err2 == nil {
-				resp.Winner = winner
-				resp.Ranking = ranking
-				w.WriteHeader(http.StatusOK)
-				serial, _ := json.Marshal(resp)
-				w.Write(serial)
-			} else {
-				if err1 != nil {
-					fmt.Println("erreur 1")
-					w.WriteHeader(http.StatusBadRequest)
-					msg := fmt.Sprintf("Error: %s", err1)
-					w.Write([]byte(msg))
-				}
-				if err2 != nil {
-					fmt.Println("erreur 2")
-					w.WriteHeader(http.StatusBadRequest)
-					msg := fmt.Sprintf("Error: %s", err2)
-					w.Write([]byte(msg))
-					return
-				}
-			}
-		case "stv":
-			fmt.Println("STV")
-			winner, err1 := comsoc.STV_SCF(ballot.Prof)
-			func_ranking := comsoc.SWFFactory(comsoc.STV_SWF, comsoc.TieBreakFactory(ballot.Tiebreak))
-			ranking, err2 := func_ranking(ballot.Prof)
-			if err1 == nil && err2 == nil {
-				resp.Winner = winner[0]
-				resp.Ranking = ranking
-				w.WriteHeader(http.StatusOK)
-				serial, _ := json.Marshal(resp)
-				w.Write(serial)
-			} else {
-				if err1 != nil {
-					w.WriteHeader(http.StatusBadRequest)
-					msg := fmt.Sprintf("Error: %s", err1)
-					w.Write([]byte(msg))
-				}
-				if err2 != nil {
-					w.WriteHeader(http.StatusBadRequest)
-					msg := fmt.Sprintf("Error: %s", err2)
-					w.Write([]byte(msg))
-					return
-				}
-			}
-		default:
-			fmt.Println("Unknown Method")
-			w.WriteHeader(http.StatusNotImplemented)
-			msg := fmt.Sprintf("Rule not implemented")
-			w.Write([]byte(msg))
-			return
 		}
 	}
 }

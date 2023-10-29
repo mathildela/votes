@@ -864,6 +864,20 @@ func TestCondorcetWinner(t *testing.T) {
 		t.Errorf("no count result should returned, %T computed", res3)
 	}
 
+	// Cas avec un seul votant
+	prefs4 := [][]Alternative{
+		{1, 2, 3},
+	}
+
+	res4, err4 := CondorcetWinner(prefs4)
+
+	if err4 != nil {
+		t.Errorf("no error should be returned, %s computed", err4)
+	}
+	if len(res4) == 0 || res4[0] != 1 {
+		t.Errorf("error, result should be 1, %d computed", res4[0])
+	}
+
 }
 
 // ---------------------------------------------

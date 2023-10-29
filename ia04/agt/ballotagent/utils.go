@@ -111,3 +111,7 @@ func (rsa *RestServerAgent) GetBallot(ballot_id string) Ballot {
 func DeadlineExpired(t time.Time) bool {
 	return time.Now().After(t)
 }
+
+func EarlierThanDeadline(t time.Time) bool {
+	return time.Now().Before(t)
+}

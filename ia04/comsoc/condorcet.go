@@ -29,7 +29,7 @@ func CondorcetWinner(p Profile) (bestAlts []Alternative, err error) {
 			}
 		}
 		bestAlts := maxCount(count)
-		if count[bestAlts[0]] != (len(p[0])-1)*(len(p[0])-1) {
+		if count[bestAlts[0]] != 2*(len(p[0])-1) {
 			// on multiplie par nb candidats moins 1 car lors du compte chaque candidat a "affronté" tous les autres candidats
 			return nil, nil
 		} else {
