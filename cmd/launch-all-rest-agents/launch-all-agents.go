@@ -82,7 +82,7 @@ func AddBallot(url_server string, rule string, deadline string, voter_ids []stri
 	if err != nil {
 		log.Fatal(err)
 	}
-	if resp.StatusCode == http.StatusOK {
+	if resp.StatusCode == http.StatusCreated {
 		fmt.Println("La requête de création de ballot a réussi!")
 	} else {
 		fmt.Printf("La requête de création de ballot a échoué avec le code d'état : %d\n", resp.StatusCode)
