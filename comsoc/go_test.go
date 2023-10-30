@@ -1038,17 +1038,17 @@ func TestSTVSWF(t *testing.T) {
 		t.Errorf("no error should be returned, %s computed", err1)
 	}
 
-	if res1[1] != 1 {
-		t.Errorf("error, result for 1 should be 1, %d computed", res1[1])
+	if res1[1] != 3 {
+		t.Errorf("error, result for 1 should be 3, %d computed", res1[1])
 	}
-	if res1[2] != 0 {
-		t.Errorf("error, result for 2 should be 0, %d computed", res1[2])
+	if res1[2] != 2 {
+		t.Errorf("error, result for 2 should be 2, %d computed", res1[2])
 	}
 	if res1[3] != 0 {
 		t.Errorf("error, result for 3 should be 0, %d computed", res1[3])
 	}
-	if res1[4] != 0 {
-		t.Errorf("error, result for 4 should be 0, %d computed", res1[4])
+	if res1[4] != 1 {
+		t.Errorf("error, result for 4 should be 1, %d computed", res1[4])
 	}
 
 	// Cas avec une égalité dans la majorité
@@ -1069,17 +1069,17 @@ func TestSTVSWF(t *testing.T) {
 		t.Errorf("no error should be returned, %s computed", err2)
 	}
 
-	if res2[1] != 1 {
-		t.Errorf("error, result for 1 should be 1, %d computed", res2[1])
+	if res2[1] != 3 {
+		t.Errorf("error, result for 1 should be 3, %d computed", res2[1])
 	}
-	if res2[2] != 0 {
-		t.Errorf("error, result for 2 should be 0, %d computed", res2[2])
+	if res2[2] != 2 {
+		t.Errorf("error, result for 2 should be 2, %d computed", res2[2])
 	}
 	if res2[3] != 0 {
 		t.Errorf("error, result for 3 should be 0, %d computed", res2[3])
 	}
-	if res2[4] != 0 {
-		t.Errorf("error, result for 4 should be 0, %d computed", res2[4])
+	if res2[4] != 1 {
+		t.Errorf("error, result for 4 should be 1, %d computed", res2[4])
 	}
 
 	// Cas avec une erreur
@@ -1096,6 +1096,36 @@ func TestSTVSWF(t *testing.T) {
 	}
 	if len(res3) != 0 {
 		t.Errorf("no count result should returned, %T computed", res3)
+	}
+
+	// Autre test
+	prefs4 := [][]Alternative{
+		{3, 5, 2, 1, 4},
+		{1, 5, 4, 3, 2},
+		{4, 5, 2, 1, 3},
+		{1, 3, 2, 5, 4},
+	}
+
+	res4, err4 := STV_SWF(prefs4)
+
+	if err4 != nil {
+		t.Errorf("no error should be returned, %s computed", err2)
+	}
+
+	if res4[1] != 4 {
+		t.Errorf("error, result for 1 should be 4, %d computed", res4[1])
+	}
+	if res4[2] != 1 {
+		t.Errorf("error, result for 2 should be 1, %d computed", res4[2])
+	}
+	if res4[3] != 3 {
+		t.Errorf("error, result for 3 should be 3, %d computed", res4[3])
+	}
+	if res4[4] != 2 {
+		t.Errorf("error, result for 4 should be 2, %d computed", res4[4])
+	}
+	if res4[5] != 0 {
+		t.Errorf("error, result for 4 should be 0, %d computed", res4[5])
 	}
 }
 

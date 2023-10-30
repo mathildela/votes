@@ -2,6 +2,7 @@ package comsoc
 
 func STV_SWF(p Profile) (Count, error) {
 	p_copy := copyProfile(p)
+	count := initCount(p)
 
 	// Pour la majorité, on applique le tiebreak suivant : "l'alternative avec le plus petit indice gagne"
 	orderedAlts := make([]Alternative, len(p[0]))
@@ -25,17 +26,16 @@ func STV_SWF(p Profile) (Count, error) {
 			if err != nil {
 				return nil, err
 			}
+			for _, value := range p_copy[0] {
+				count[value] += 1
+			}
 		}
-
+		//fmt.Println("count :", count)
 		//fmt.Printf("p_copy après remove : %v\n", p_copy)
 	}
 
 	//fmt.Printf("dernier profile : %v\n", p_copy)
-	winner := p_copy[0][0]
-	final_count := initCount(p)
-	final_count[winner] += 1
-
-	return final_count, nil
+	return count, nil
 }
 
 func STV_SCF(p Profile) (bestAlts []Alternative, err error) {
