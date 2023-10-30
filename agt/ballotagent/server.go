@@ -142,7 +142,7 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 					w.Write([]byte(msg))
 					return
 				} else {
-					w.WriteHeader(http.StatusOK)
+					w.WriteHeader(http.StatusCreated)
 					serial, _ := json.Marshal(resp)
 					w.Write(serial)
 				}
