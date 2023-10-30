@@ -78,6 +78,8 @@ func (rsa *RestServerAgent) CheckBallot(ballot_id string) bool {
 func (rsa *RestServerAgent) CheckPref(prefs []comsoc.Alternative, ballot_id string) error {
 	if len(prefs) == 0 {
 		return errors.New("prefs is empty")
+	} else if len(prefs) > rsa.ballot_list[ballot_id].Alts {
+		return errors.New("too much values in prefs")
 	} else {
 		for i := 1; i <= rsa.ballot_list[ballot_id].Alts; i++ {
 			if !comsoc.Contains(prefs, comsoc.Alternative(i)) {
