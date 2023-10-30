@@ -240,7 +240,7 @@ func main() {
 		fmt.Println("Le gagnant est :", res["winner"])
 		fmt.Println("Le classement est :", res["ranking"])
 	}
-
+	fmt.Println("\nAppuyez sur Entrée pour passer à la prochaine méthode de vote")
 	fmt.Scanln()
 
 	// ************************** BORDA **************************
@@ -277,7 +277,7 @@ func main() {
 		fmt.Println("Le gagnant est :", res["winner"])
 		fmt.Println("Le classement est :", res["ranking"])
 	}
-
+	fmt.Println("\nAppuyez sur Entrée pour passer à la prochaine méthode de vote")
 	fmt.Scanln()
 
 	// ************************** APPROVAL **************************
@@ -313,7 +313,7 @@ func main() {
 	} else {
 		fmt.Println("Le gagnant est :", res["winner"])
 	}
-
+	fmt.Println("\nAppuyez sur Entrée pour passer à la prochaine méthode de vote")
 	fmt.Scanln()
 
 	// ************************** CONDORCET **************************
@@ -354,7 +354,7 @@ func main() {
 		}
 
 	}
-
+	fmt.Println("\nAppuyez sur Entrée pour passer à la prochaine méthode de vote")
 	fmt.Scanln()
 
 	// ************************** COPELAND **************************
@@ -391,7 +391,7 @@ func main() {
 		fmt.Println("Le gagnant est :", res["winner"])
 		fmt.Println("Le classement est :", res["ranking"])
 	}
-
+	fmt.Println("\nAppuyez sur Entrée pour passer à la prochaine méthode de vote")
 	fmt.Scanln()
 
 	// ************************** STV **************************

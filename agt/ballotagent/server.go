@@ -208,6 +208,17 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 		msg := fmt.Sprintf("Deadline is over")
 		w.Write([]byte(msg))
 		return
+	} else if rsa.ballot_list[req.Ballot_id].Rule == "approval" && len(req.Options) != 1 {
+
+		w.WriteHeader(http.StatusBadRequest)
+		msg := fmt.Sprintf("Vote method is approval. Please specify the threshold in the options (one integer).")
+		w.Write([]byte(msg))
+		return
+	} else if rsa.ballot_list[req.Ballot_id].Rule == "approval" && (req.Options[0] <= 0 || req.Options[0] > rsa.ballot_list[req.Ballot_id].Alts) {
+		w.WriteHeader(http.StatusBadRequest)
+		msg := fmt.Sprintf("Vote method is approval. The threshold must be between 1 and %d", rsa.ballot_list[req.Ballot_id].Alts)
+		w.Write([]byte(msg))
+		return
 	} else {
 		var Ballot_copy Ballot = rsa.ballot_list[req.Ballot_id]
 		Ballot_copy.Prof = append(Ballot_copy.Prof, req.Prefs)
