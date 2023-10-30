@@ -46,7 +46,7 @@ Démarrer le server & les agents de votes
 - Approval "approval" (options à renseigner)
 - Condorcet "condorcet"
 - Copeland "copeland"
-- STV "stv"
+- STV "stv" -> expliquer en détail (choix du tiebreak pour majority, ce qu'on renvoie en sortie pour SWF...)
 
 Les factories sont dans `/comsoc/utils.go` et les tests dans `/comsoc/go_tests.go`.
 
