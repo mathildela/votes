@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"ia04/comsoc"
 	"log"
 	"net/http"
 	"sync"
 	"time"
+
+	"gitlab.utc.fr/langemat/ia04/comsoc"
 )
 
 type RestServerAgent struct {

@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"ia04/comsoc"
 	"log"
 	"net/http"
+
+	"gitlab.utc.fr/langemat/ia04/comsoc"
 )
 
 type RestClientAgent struct {

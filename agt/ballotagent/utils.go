@@ -2,8 +2,9 @@ package ballotagent
 
 import (
 	"errors"
-	"ia04/comsoc"
 	"time"
+
+	"gitlab.utc.fr/langemat/ia04/comsoc"
 )
 
 type Ballot struct {

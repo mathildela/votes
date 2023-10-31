@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"ia04/agt/ballotagent"
+
+	"gitlab.utc.fr/langemat/ia04/agt/ballotagent"
 )
 
 func main() {
