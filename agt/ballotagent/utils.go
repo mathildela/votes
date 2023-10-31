@@ -19,7 +19,6 @@ type Ballot struct {
 }
 
 func (rsa *RestServerAgent) NewBallot(ballot_id string, rule string, deadline time.Time, alts int, voter_ids []string, tiebreak []comsoc.Alternative) error {
-	// Vérifie si cd ballot existe deja
 	_, ok := rsa.ballot_list[ballot_id]
 	if ok {
 		return errors.New("Ballot already exists")
@@ -27,8 +26,7 @@ func (rsa *RestServerAgent) NewBallot(ballot_id string, rule string, deadline ti
 		var p comsoc.Profile = make(comsoc.Profile, 0)
 		var a_vote []string = make([]string, 0)
 		var options [][]int = make([][]int, 0)
-		var ballot Ballot
-		ballot = Ballot{
+		var ballot Ballot = Ballot{
 			Rule:      rule,
 			Deadline:  deadline,
 			Voter_ids: voter_ids,
@@ -84,7 +82,7 @@ func (rsa *RestServerAgent) CheckPref(prefs []comsoc.Alternative, ballot_id stri
 	} else {
 		for i := 1; i <= rsa.ballot_list[ballot_id].Alts; i++ {
 			if !comsoc.Contains(prefs, comsoc.Alternative(i)) {
-				return errors.New("Missing value(s) in prefs")
+				return errors.New("missing value(s) in prefs")
 			}
 		}
 	}

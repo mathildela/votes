@@ -110,12 +110,10 @@ func Vote(url_server string, nomscrutin string, nb_votants int, nb_alts int) (lA
 		prefs := generatePrefs(nb_alts)
 		options := make([]int, 0)
 		agt := voteragent.NewRestClientAgent(id, url_server, nomscrutin, prefs, options)
-		clAgts = append(clAgts, *agt) //Fais un slice d'agents
+		clAgts = append(clAgts, *agt)
 	}
 
 	for _, agt := range clAgts {
-		// attention, obligation de passer par cette lambda pour faire capturer la valeur de l'itération par la goroutine
-		// pour récupérer la bonne valeur du pointeur qui va sur l'agent
 		func(agt voteragent.RestClientAgent) {
 			go agt.Start()
 		}(agt)
@@ -133,12 +131,10 @@ func VoteApproval(url_server string, nomscrutin string, nb_votants int, nb_alts 
 		options := make([]int, 0)
 		options = append(options, rand.Intn(nb_alts)+1)
 		agt := voteragent.NewRestClientAgent(id, url_server, nomscrutin, prefs, options)
-		clAgts = append(clAgts, *agt) //Fais un slice d'agents
+		clAgts = append(clAgts, *agt)
 	}
 
 	for _, agt := range clAgts {
-		// attention, obligation de passer par cette lambda pour faire capturer la valeur de l'itération par la goroutine
-		// pour récupérer la bonne valeur du pointeur qui va sur l'agent
 		func(agt voteragent.RestClientAgent) {
 			go agt.Start()
 		}(agt)

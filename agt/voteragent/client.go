@@ -22,18 +22,6 @@ func NewRestClientAgent(id string, url string, ballot_id string, prefs []comsoc.
 	return &RestClientAgent{id, url, ballot_id, prefs, options}
 }
 
-// Quelle réponse du serveur traiter ? Les agents client ne font que voter ?
-/*
-func (rca *RestClientAgent) treatResponse(r *http.Response) int {
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(r.Body)
-
-	var resp comsoc.ResponseVote
-	json.Unmarshal(buf.Bytes(), &resp)
-
-	return resp.Result
-}*/
-
 func (rca *RestClientAgent) doRequest() (err error) {
 	req := comsoc.RequestVote{
 		Agent_id:  rca.id,
@@ -57,7 +45,6 @@ func (rca *RestClientAgent) doRequest() (err error) {
 		err = fmt.Errorf("[%d] %s", resp.StatusCode, resp.Status)
 		return err
 	}
-	//res = rca.treatResponse(resp)
 	return nil
 }
 

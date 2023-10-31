@@ -77,12 +77,6 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	// traitement de la requête
 	var resp comsoc.ResponseNewBallot
 
-	// Faire différents tests pour renvoyer les bons messages d'erreurs
-	// 1) Vérifier que les strings de rule sont bien dans la liste d'implémentés -> not implemented
-	// 2) Vérifier que la deadline est dans le futur -> faire une fonction A FAIRE
-	// 3) Vérifier que alts > 0
-	// 4) Vérifier que voter-ids n'est pas vide
-	// 5) Vérifier que le tie-break n'est pas vide et que sa longueur est égale à alts
 	if len(req.Rule) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		msg := fmt.Sprintf("rule empty")
@@ -114,7 +108,6 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 		w.Write([]byte(msg))
 		return
 	} else if (req.Rule == "majority" || req.Rule == "borda" || req.Rule == "copeland") && !CheckTieBreak(req.TieBreak, req.Alts) {
-		// VERIFIER
 		w.WriteHeader(http.StatusBadRequest)
 		msg := fmt.Sprintf("all values from 1 to %d must be in tiebreak", req.Alts)
 		w.Write([]byte(msg))
@@ -152,9 +145,6 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// La fonction doVote permet de remplir le profile créé avec la fonction précédente
-// Il faut vérifier que le profile existe, que le vote n'a pas déjà été fait et que la deadline
-// n'est pas passée
 func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	rsa.Lock()
 	defer rsa.Unlock()
@@ -171,8 +161,6 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, err.Error())
 		return
 	}
-
-	// Verifier que les valeurs sont cohérentes (vérifications plus poussées à l'avenir)
 
 	if len(req.Ballot_id) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
@@ -251,7 +239,6 @@ func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 	// traitement de la requête
 	var resp comsoc.ResponseResult
 
-	// Verifier que les valeurs sont cohérentes (vérifications plus poussées à l'avenir)
 	if len(req.Ballot_id) == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		msg := fmt.Sprintf("ballot-id is empty")
@@ -268,7 +255,6 @@ func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(msg))
 		return
 	} else {
-		// utiliser les bonnes fonctions ici donc à partir d'un case
 		var ballot Ballot = rsa.ballot_list[req.Ballot_id]
 		// Cas où personne n'a voté
 		if len(ballot.Prof) == 0 {
@@ -329,8 +315,6 @@ func (rsa *RestServerAgent) doResult(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			case "approval":
-				// Besoin des options + pas de gestion de tiebreak dans la fonction
-				// Verifier que les options sont cohérentes
 				winner, err := comsoc.ApprovalSCF(ballot.Prof, GetOptionsApproval(ballot.Options))
 				if err == nil {
 					resp.Winner = winner[0]
