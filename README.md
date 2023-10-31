@@ -48,7 +48,7 @@ Ce fichier contient des tests pour toutes les méthodes de vote implémentées. 
 
 Les factories TieBreakFactory, SWFFactory et SCFFactory sont dans `/comsoc/utils.go` et les tests dans `/comsoc/go_tests.go`.
 
-## Authors
+## Auteures
 
 - Mathilde Lange
 - Solenn Lenoir
