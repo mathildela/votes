@@ -1,13 +1,13 @@
 # API Vote
 
 Une API REST pour : 
-- créer un nouveau de ballot de Vote avec la méthode _/new_ballot_
-- voter avec la méthode _/vote_
-- récupérer le résultat des votes avec la méthode _/result_
+- créer un nouveau de ballot de Vote avec la méthode /new_ballot
+- voter avec la méthode /vote
+- récupérer le résultat des votes avec la méthode /result
 
-1. Possibilité de lancer le serveur et de faire les commandes dans le navigateur avec l'executable dans le dossier launch-rsagt
+1. Possibilité de lancer le serveur et de faire les commandes dans le navigateur avec l'executable dans le dossier `launch-rsagt`
 
-2. Possibilité de lancer tous les agents de votes en même temps pour tester toutes les méthodes avec l'executable dans le dossier launch-all-rest-agents
+2. Possibilité de lancer tous les agents de votes en même temps pour tester toutes les méthodes avec l'executable dans le dossier `launch-all-rest-agents`
 
 ## Utilisation locale
 
@@ -18,7 +18,7 @@ Une API REST pour :
   go get gitlab.utc.fr/langemat/ia04@install 
 
 ```
-Les fichiers se trouvent dans le GOPATH dans le dossier pkg/mod/gitlab.utc.fr/langemat
+Les fichiers se trouvent dans le GOPATH dans le dossier `pkg/mod/gitlab.utc.fr/langemat`
 
 **Démarrer le serveur**
 
