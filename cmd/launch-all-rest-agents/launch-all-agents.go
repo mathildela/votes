@@ -185,7 +185,6 @@ func getResult(url_serveur string, nomscrutin string) (map[string]interface{}, e
 func main() {
 	const url1 = ":8080"
 	const url2 = "http://localhost:8080"
-	const nb_alts = 4
 	const attente = 3
 
 	var n int
@@ -195,8 +194,15 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	}
+
+	var alts int
+	fmt.Print("\nEntrez le nombre d'alternatives : ")
+	_, err = fmt.Scanln(&alts)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
 	voters_ids := generateAgentIDs(n)
-	alts := nb_alts
 	tiebreak := generatePrefs(alts)
 
 	servAgt := ballotagent.NewRestServerAgent(url1)
@@ -224,7 +230,7 @@ func main() {
 	}
 
 	// Vote
-	clAgts := Vote(url2, nomscrutin, n, nb_alts)
+	clAgts := Vote(url2, nomscrutin, n, alts)
 	if clAgts == nil {
 		fmt.Println("Error")
 		return
@@ -261,7 +267,7 @@ func main() {
 	}
 
 	// Vote
-	clAgts = Vote(url2, nomscrutin, n, nb_alts)
+	clAgts = Vote(url2, nomscrutin, n, alts)
 	if clAgts == nil {
 		fmt.Println("Error")
 		return
@@ -298,7 +304,7 @@ func main() {
 	}
 
 	// Vote
-	clAgts = VoteApproval(url2, nomscrutin, n, nb_alts)
+	clAgts = VoteApproval(url2, nomscrutin, n, alts)
 	if clAgts == nil {
 		fmt.Println("Error")
 		return
@@ -334,7 +340,7 @@ func main() {
 	}
 
 	// Vote
-	clAgts = Vote(url2, nomscrutin, n, nb_alts)
+	clAgts = Vote(url2, nomscrutin, n, alts)
 	if clAgts == nil {
 		fmt.Println("Error")
 		return
@@ -375,7 +381,7 @@ func main() {
 	}
 
 	// Vote
-	clAgts = Vote(url2, nomscrutin, n, nb_alts)
+	clAgts = Vote(url2, nomscrutin, n, alts)
 	if clAgts == nil {
 		fmt.Println("Error")
 		return
@@ -412,7 +418,7 @@ func main() {
 	}
 
 	// Vote
-	clAgts = Vote(url2, nomscrutin, n, nb_alts)
+	clAgts = Vote(url2, nomscrutin, n, alts)
 	if clAgts == nil {
 		fmt.Println("Error")
 		return
