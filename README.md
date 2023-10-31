@@ -15,7 +15,7 @@ Une API REST pour :
 
 ```bash
   go mod init projet_test
-  go get gitlab.utc.fr/langemat/ia04@install 
+  go get gitlab.utc.fr/langemat/ia04@apivote
 
 ```
 Les fichiers se trouvent dans le GOPATH dans le dossier `pkg/mod/gitlab.utc.fr/langemat`
