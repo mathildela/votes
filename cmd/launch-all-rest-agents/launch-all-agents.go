@@ -183,7 +183,7 @@ func getResult(url_serveur string, nomscrutin string) (map[string]interface{}, e
 func main() {
 	const url1 = ":8080"
 	const url2 = "http://localhost:8080"
-	const nb_alts = 5
+	const nb_alts = 4
 	const attente = 3
 
 	var n int
@@ -195,7 +195,7 @@ func main() {
 	}
 	voters_ids := generateAgentIDs(n)
 	alts := nb_alts
-	tiebreak := []comsoc.Alternative{4, 2, 3, 5, 1}
+	tiebreak := generatePrefs(alts)
 
 	servAgt := ballotagent.NewRestServerAgent(url1)
 
