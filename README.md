@@ -24,7 +24,7 @@ Les fichiers se trouvent dans le GOPATH dans le dossier `pkg/mod/gitlab.utc.fr/l
 
 ```bash
   cd cmd/launch-rsagt
-  ./launch-rsagt.exe
+  ./launch-rsagt
 ```
 Des tests peuvent ensuite être effectués par API REST sur localhost:8080
 
@@ -33,7 +33,7 @@ Des tests peuvent ensuite être effectués par API REST sur localhost:8080
 ```bash
   cd ..
   cd launch-all-rest-agents
-  ./launch-all-rest-agents.exe
+  ./launch-all-rest-agents
 ```
 Ce fichier contient des tests pour toutes les méthodes de vote implémentées. L'utilisateur doit renseigner le nombre d'agents votants et le nombre de candidats (chaque candidat est associé à un entier entre 1 et n). La deadline, les voter-ids et le tiebreak pour les ballots sont générés automatiquement, ainsi que les préférences des votants. La deadline est créée afin de permettre d'obtenir un résultat rapidement.
 
