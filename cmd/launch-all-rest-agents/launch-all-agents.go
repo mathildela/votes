@@ -10,9 +10,11 @@ import (
 	"net/http"
 	"time"
 
-	"ia04/agt/ballotagent"
-	"ia04/agt/voteragent"
-	"ia04/comsoc"
+	"gitlab.utc.fr/langemat/ia04/agt/voteragent"
+
+	"gitlab.utc.fr/langemat/ia04/comsoc"
+
+	"gitlab.utc.fr/langemat/ia04/agt/ballotagent"
 )
 
 type DataNewBallot struct {
