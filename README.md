@@ -23,21 +23,21 @@ attente
 Récupération du projet
 
 ```bash
-  go install github.com/yourusername/mypackage
+  go get gitlab.utc.fr/langemat/ia04@install 
+
 ```
 
 Démarrer le server
 
 ```bash
-  cd []
-  ./mon_programme (main juste server)
+  ./launch-rsagt.exe
 ```
 
 Démarrer le server & les agents de votes
 
 ```bash
   cd []
-  ./mon_programme 2 (all_agents)
+  ./launch-all-rest-agents.exe
 ```
 ## Méthodes de vote implémentées
 
