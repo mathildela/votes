@@ -1,13 +1,8 @@
 package comsoc
 
 import (
-	"fmt"
 	"testing"
 )
-
-// dans ia04/comsoc:
-// go test -v 	pour tous les tester
-// go test -run TestFunction	pour tester une fonction spécifique
 
 func isEqualSliceAlt(a, b []Alternative) bool {
 	if len(a) != len(b) {
@@ -26,7 +21,6 @@ func isEqualSliceAlt(a, b []Alternative) bool {
 // ---------------------------------------------
 
 func Test_rank(t *testing.T) {
-	// rank(alt Alternative, prefs []Alternative) int
 	tab := [...]Alternative{1, 2, 3, 4, 5}
 	prefs := tab[:]
 
@@ -48,7 +42,6 @@ func Test_rank(t *testing.T) {
 }
 
 func Test_isPref(t *testing.T) {
-	//isPref(alt1, alt2 Alternative, prefs []Alternative) bool
 
 	tab := [...]Alternative{0, 1, 2, 3, 4, 5}
 	prefs := tab[:]
@@ -68,8 +61,6 @@ func Test_isPref(t *testing.T) {
 }
 
 func Test_maxCount(t *testing.T) {
-	//func maxCount(count Count) (bestAlts []Alternative)
-	//type Count map[Alternative]int
 
 	var count_1 Count = Count{0: 4, 1: 2, 2: 0, 3: 2, 4: 5, 5: 2}
 	tab_1 := [...]Alternative{4}
@@ -557,7 +548,7 @@ func TestTieBreakFactory(t *testing.T) {
 	alts = []Alternative{5, 6, 7}
 	res, err = TieBreak(alts)
 	if err == nil {
-		t.Error("No order should be known for the alternatives given")
+		t.Error("no order should be known for the alternatives given")
 	}
 	if res != -1 {
 		t.Errorf("No alternative should be chosen, %d computed", res)
@@ -619,7 +610,6 @@ func TestSWFFactory(t *testing.T) {
 	SWFMajority = SWFFactory(MajoritySWF, TieBreak)
 
 	res1, err1 := SWFMajority(prefs1)
-	fmt.Println(res1)
 	if err1 != nil {
 		t.Errorf("no error should be returned, %s computed", err1)
 	}
@@ -699,10 +689,6 @@ func TestSWFFactory(t *testing.T) {
 	if res3[3] != 1 {
 		t.Errorf("error, the fourth result should be 1, %d computed", res3[3])
 	}
-
-	// Test pour STV
-	// Les TieBreak doivent être gérés dans la fonction. Pas possible avec la Factory
-	// (ou faire un cas à part si on détecte le nom de la fonction ?)
 
 	// Cas avec des erreurs
 	prefs4 := [][]Alternative{
@@ -815,10 +801,6 @@ func TestSCFFactory(t *testing.T) {
 	if res4 != 3 {
 		t.Errorf("error, result for 1 should be 3, %d computed", res4)
 	}
-
-	// Test pour STV
-	// Les TieBreak doivent être gérés dans la fonction. Pas possible avec la Factory
-	// (ou faire un cas à part si on détecte le nom de la fonction ?)
 
 	// Cas avec des erreurs
 	prefs5 := [][]Alternative{

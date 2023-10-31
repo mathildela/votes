@@ -29,7 +29,6 @@ func isPref(alt1, alt2 Alternative, prefs []Alternative) bool {
 }
 
 // renvoie les meilleures alternatives pour un décompte donné
-// Vérifier avec plusieurs tests
 func maxCount(count Count) (bestAlts []Alternative) {
 	var max int = -100000
 	bestAlts = make([]Alternative, 0)
@@ -170,7 +169,6 @@ func sameCount(a Alternative, count Count) []Alternative {
 }
 
 // SWF doivent renvoyer un ordre total sans égalité
-// Les SWF doivent renvoyer des counts à la fin (différence avec le sujet)
 func SWFFactory(swf func(p Profile) (Count, error), tiebreak func([]Alternative) (Alternative, error)) func(Profile) ([]Alternative, error) {
 	if swf == nil || tiebreak == nil {
 		return nil
@@ -182,11 +180,9 @@ func SWFFactory(swf func(p Profile) (Count, error), tiebreak func([]Alternative)
 				return nil, err
 			} else {
 				for len(count) != 0 {
-					//fmt.Println("count og :", count)
 					max := maxCount(count)
-					//fmt.Println("max = ", max)
 					if len(max) == 0 {
-						err = errors.New("Erreur dans la fonction maxCount")
+						err = errors.New("erreur dans la fonction maxCount")
 						return nil, err
 					} else if len(max) == 1 {
 						res = append(res, max[0])
@@ -204,7 +200,6 @@ func SWFFactory(swf func(p Profile) (Count, error), tiebreak func([]Alternative)
 							}
 						}
 					}
-					//fmt.Println("res:", res)
 				}
 				return res, nil
 			}
@@ -212,7 +207,6 @@ func SWFFactory(swf func(p Profile) (Count, error), tiebreak func([]Alternative)
 	}
 }
 
-// SCF doivent renvoyer un seul élement
 func SCFFactory(scf func(p Profile) ([]Alternative, error), tiebreak func([]Alternative) (Alternative, error)) func(Profile) (Alternative, error) {
 	if scf == nil || tiebreak == nil {
 		return nil

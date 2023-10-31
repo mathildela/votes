@@ -12,12 +12,8 @@ func STV_SWF(p Profile) (Count, error) {
 	tiebreak := TieBreakFactory(orderedAlts)
 
 	for tour := 0; tour < len(p[0])-1; tour++ {
-		//fmt.Printf("Tour %d\n", tour)
-		//fmt.Printf("profil actuel : %v\n", p_copy)
 		MajorityWithTieBreak := SWFFactory(MajoritySWF, tiebreak)
 		alts, err := MajorityWithTieBreak(p_copy)
-
-		//fmt.Printf("count %v\n", c)
 
 		if err != nil {
 			return nil, err
@@ -30,11 +26,8 @@ func STV_SWF(p Profile) (Count, error) {
 				count[value] += 1
 			}
 		}
-		//fmt.Println("count :", count)
-		//fmt.Printf("p_copy après remove : %v\n", p_copy)
 	}
 
-	//fmt.Printf("dernier profile : %v\n", p_copy)
 	return count, nil
 }
 

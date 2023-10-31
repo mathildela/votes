@@ -18,7 +18,6 @@ func CopelandSWF(p Profile) (count Count, err error) {
 						}
 					}
 					if sum1 > sum2 {
-						//vérification des préférences. Comment gérer égalité ?
 						// ici on considère que si égalité, pas de point attribué
 						count[a1]++
 						count[a2]--

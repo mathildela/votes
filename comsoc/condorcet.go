@@ -18,9 +18,6 @@ func CondorcetWinner(p Profile) (bestAlts []Alternative, err error) {
 						}
 					}
 					if sum1 > sum2 {
-						//vérification des préférences. Comment gérer égalité ?
-						//ici on considère que pour qu'un candidat soit gagnant de condorcet, il doit
-						//gagner strictement contre tous les candidats
 						count[a1]++
 					} else {
 						count[a2]++
