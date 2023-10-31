@@ -41,9 +41,9 @@ Ce fichier contient des tests pour toutes les méthodes de vote implémentées. 
 
 - Majorité (rule:"majority"),
 - Borda (rule:"borda"),
-- Approval (rule:"approval"), options à renseigner sous forme d'un int[] de longueur 1,
+- Approval (rule:"approval"), options à renseigner sous forme d'un []int de longueur 1,
 - Condorcet (rule:"condorcet"). Si pas de gagnant de Condorcet, la valeur renvoyée est 0 car il s'agit de la 0-value du type entier. Or cela ne correspond à aucun candidat existant,
-- Copeland (rule:"copeland")
+- Copeland (rule:"copeland"),
 - STV (rule:"stv"). Pour chaque tour on applique la majorité. En cas d'égalité, le candidat avec le plus petit indice est choisi car la fonction STV_SWF ne prend pas de tie-break en argument. STV_SWF renvoie un count tel que plus une alternative progresse dans les tours, plus son score est élévé.
 
 Les factories TieBreakFactory, SWFFactory et SCFFactory sont dans `/comsoc/utils.go` et les tests dans `/comsoc/go_tests.go`.
